@@ -1,0 +1,18 @@
+# Verdix robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://verdix-oficial.vercel.app/sitemap.xml
+
+# Disallow admin/private paths
+Disallow: /api/
+Disallow: /assets/
+Disallow: /os/
+Disallow: /build/
+Disallow: /apk/
+Disallow: /downloads/
+Disallow: /server.py
+Disallow: /.env
+Disallow: /.git
+Disallow: /.vercel

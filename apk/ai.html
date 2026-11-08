@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verdix AI</title>
+  <meta name="description" content="Chateá con Verdix AI y obtené respuestas al instante." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html" class="active">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="tool-page">
+    <div class="wrap" style="max-width:820px">
+      <div class="tool-head">
+        <span class="eyebrow">Verdix AI · Beta</span>
+        <h1>Preguntá lo que quieras.</h1>
+        <p>Tu asistente futurista, listo para ayudarte.</p>
+      </div>
+
+      <div class="panel">
+        <div class="chat">
+          <div class="chat-log" id="chat-log">
+            <div class="msg bot">
+              <div class="avatar">∞</div>
+              <div class="bubble">¡Hola! Soy Verdix AI. ¿En qué puedo ayudarte?</div>
+            </div>
+          </div>
+
+          <form class="chat-input" id="chat-form">
+            <textarea id="chat-text" rows="1" placeholder="Escribí tu mensaje..." aria-label="Mensaje"></textarea>
+            <button class="send-btn" type="submit" id="send-btn" aria-label="Enviar">➤</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <div class="footer-links">
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </div>
+      <span>© <span data-year>2026</span> Verdix.</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/ai.js"></script>
+</body>
+</html>

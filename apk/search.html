@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verdix Search</title>
+  <meta name="description" content="Buscá en la web, imágenes, videos y noticias con Verdix Search." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="browser.html">Browser</a>
+        <a href="search.html" class="active">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="tool-page">
+    <div class="wrap" style="max-width:900px">
+      <div class="tool-head">
+        <span class="eyebrow">Verdix Search</span>
+        <h1>Buscá lo que quieras.</h1>
+        <p>Web, imágenes, videos y noticias. Rápido, simple y sin distracciones.</p>
+      </div>
+
+      <div class="panel">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-type="web" role="tab" type="button">🌐 Web</button>
+          <button class="tab" data-type="images" role="tab" type="button">🖼️ Imágenes</button>
+          <button class="tab" data-type="videos" role="tab" type="button">🎬 Videos</button>
+          <button class="tab" data-type="news" role="tab" type="button">📰 Noticias</button>
+        </div>
+
+        <form id="search-form" class="search-box" autocomplete="off">
+          <span aria-hidden="true">🔍</span>
+          <input id="search-input" type="search" placeholder="Buscá en la web..." aria-label="Buscar" />
+          <button class="btn btn-primary" type="submit">Buscar</button>
+        </form>
+
+        <div class="quick-links">
+          <button class="chip" type="button" data-q="noticias de tecnología">Tecnología</button>
+          <button class="chip" type="button" data-q="inteligencia artificial">IA</button>
+          <button class="chip" type="button" data-q="programación tutoriales">Programación</button>
+          <button class="chip" type="button" data-q="Linux">Linux</button>
+          <button class="chip" type="button" data-q="diseño web">Diseño web</button>
+        </div>
+
+        <p class="search-note">Resultados de Verdix Search. Cada resultado se abre en una pestaña nueva.</p>
+
+        <div id="search-status" class="search-status" hidden></div>
+        <div id="search-results" class="search-results"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <div class="footer-links">
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </div>
+      <span>© <span data-year>2026</span> Verdix.</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/search.js"></script>
+</body>
+</html>

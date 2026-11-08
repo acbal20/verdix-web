@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verdix Browser</title>
+  <meta name="description" content="Navegador futurista de Verdix. Rápido, seguro y multiplataforma." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="browser.html" class="active">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="tool-page">
+    <div class="wrap">
+      <div class="tool-head">
+        <span class="eyebrow">Verdix Browser</span>
+        <h1>Tu navegador futurista.</h1>
+        <p>Escribí una dirección o elegí un acceso rápido para empezar.</p>
+      </div>
+
+      <div class="panel browser-shell">
+        <div class="browser-bar">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <button class="icon-btn" id="back-btn" title="Atrás" aria-label="Atrás">←</button>
+          <button class="icon-btn" id="reload-btn" title="Recargar" aria-label="Recargar">⟳</button>
+          <form class="url" id="url-form">
+            <span aria-hidden="true">🔒</span>
+            <input id="url-input" type="text" placeholder="Buscá con Verdix o escribí una dirección..." autocomplete="off" spellcheck="false" />
+          </form>
+          <button class="icon-btn" id="go-btn" title="Ir" aria-label="Ir">➜</button>
+          <button class="icon-btn" id="external-btn" title="Abrir en pestaña nueva" aria-label="Abrir en pestaña nueva">↗</button>
+        </div>
+
+        <div class="browser-frame">
+          <div class="browser-home" id="browser-home">
+            <a href="#" data-url="https://www.google.com"><span class="ico">G</span><span>Google</span></a>
+            <a href="#" data-url="https://www.youtube.com"><span class="ico">▶</span><span>YouTube</span></a>
+            <a href="#" data-url="https://web.whatsapp.com"><span class="ico">💬</span><span>WhatsApp</span></a>
+            <a href="#" data-url="https://mail.google.com"><span class="ico">✉</span><span>Gmail</span></a>
+            <a href="search.html"><span class="ico">🔍</span><span>Verdix Search</span></a>
+            <a href="ai.html"><span class="ico">🧠</span><span>Verdix AI</span></a>
+          </div>
+          <iframe id="browser-iframe" title="Contenido web" referrerpolicy="no-referrer"></iframe>
+          <div class="browser-fallback" id="browser-fallback">
+            <p>Este sitio no permite mostrarse dentro de otro navegador.</p>
+            <button class="btn btn-primary" id="fallback-open">Abrir en pestaña nueva ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <div class="footer-links">
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="juego/index.html">Juego</a>
+        <a href="index.html#os">OS</a>
+      </div>
+      <span>© <span data-year>2026</span> Verdix.</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/browser.js"></script>
+</body>
+</html>

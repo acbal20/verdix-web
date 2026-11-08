@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Página no encontrada — Verdix</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#04070a" />
+  <link rel="icon" type="image/png" href="/icon-192.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta property="og:title" content="Página no encontrada — Verdix" />
+  <meta property="og:description" content="La página que buscás no existe. Volvé al inicio." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/icon-512.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .error-404 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .error-404 .logo {
+      font-size: clamp(4rem, 15vw, 8rem);
+      font-weight: 700;
+      background: linear-gradient(120deg, #00ff41, #00cc33);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 60px rgba(0, 255, 65, 0.5);
+      margin-bottom: 16px;
+      animation: pulse 2s infinite;
+    }
+    .error-404 h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: #ff5c7a;
+      text-shadow: 0 0 30px rgba(255, 92, 122, 0.5);
+      margin-bottom: 12px;
+    }
+    .error-404 p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 40ch;
+      margin-bottom: 28px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="download.html">Descargas</a>
+        <a href="index.html#os">OS</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="tool-page">
+    <div class="wrap">
+      <div class="panel error-404">
+        <div class="logo">∞</div>
+        <h1>404</h1>
+        <p>Esa página se perdió en el espacio. No existe o fue movida.</p>
+        <div class="hero-actions" style="justify-content:center; flex-wrap:wrap; gap:14px;">
+          <a class="btn btn-primary" href="index.html"><span class="brand-mark" style="margin-right:8px;">∞</span> Volver al inicio</a>
+          <a class="btn btn-ghost" href="search.html">Buscar en Verdix</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <div class="footer-links">
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="download.html">Descargas</a>
+        <a href="index.html#os">OS</a>
+      </div>
+      <span>© <span data-year>2026</span> Verdix.</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

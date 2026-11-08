@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#04100a">
+<title>Ben 10: Omnitrix Battle 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div id="vignette"></div>
+  <div id="hurtFlash"></div>
+  <div id="damageFlash"></div>
+
+  <!-- ================= HUD ================= -->
+  <div id="hud" class="hidden">
+    <div id="hudTop">
+      <div class="bars">
+        <div class="bar hp"><div id="hpFill"></div><span id="hpText">100</span><b>VIDA</b></div>
+        <div class="bar omni"><div id="omniFill"></div><span id="omniText">100</span><b>OMNITRIX</b></div>
+      </div>
+      <div class="hudRight">
+        <div id="waveBox">
+          <small>OLEADA</small>
+          <strong id="waveVal">1</strong>
+          <span id="enemyVal">0 enemigos</span>
+        </div>
+        <div id="lvlBox" class="neonBox">
+          <small>NIVEL</small>
+          <strong id="lvlVal">1</strong>
+        </div>
+        <div id="scoreBox" class="neonBox">
+          <small>PUNTOS</small>
+          <strong id="scoreVal">0</strong>
+        </div>
+        <div id="currencyBox">
+          <div class="cur coin"><span>🪙</span><b id="coinVal">0</b></div>
+          <div class="cur gem"><span>💎</span><b id="gemVal">0</b></div>
+          <button id="muteBtn" class="iconBtn" title="Sonido">🔊</button>
+          <button id="pauseBtn" class="iconBtn" title="Pausa">⏸</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="bossBar" class="hidden">
+      <span>VILGAX</span>
+      <div class="bossTrack"><div id="bossFill"></div></div>
+    </div>
+
+    <div id="combo" class="hidden">x2 <small>COMBO</small></div>
+    <div id="powerRow"></div>
+    <div id="alienBar"></div>
+    <!-- Objetivo historia -->
+    <div id="storyGoalBar" class="hidden" style="position:absolute;left:50%;top:185px;transform:translateX(-50%);width:min(300px,40vw);background:rgba(5,20,12,.7);border:1px solid rgba(90,255,160,.25);border-radius:10px;padding:8px 12px;pointer-events:none;"></div>
+
+    <!-- Indicador Modo Dios -->
+    <div id="godIndicator" class="hidden">
+      <span class="modBadge">👁️ MODO DIOS ACTIVO</span>
+    </div>
+  </div>
+
+  <!-- ================= CONTROLES TÁCTILES ================= -->
+  <div id="touch">
+    <div id="stick"><div id="knob"></div></div>
+    <div id="actions">
+      <button id="btnDash" class="tbtn dash">ESQUIVA</button>
+      <button id="btnB" class="tbtn alt">PODER</button>
+      <button id="btnA" class="tbtn">GOLPE</button>
+    </div>
+  </div>
+
+  <!-- ================= AVISOS ================= -->
+  <div id="banner"><strong id="bannerTitle"></strong><span id="bannerSub"></span></div>
+  <div id="toast"></div>
+
+  <!-- ================= MENÚ PRINCIPAL ================= -->
+  <div id="menu" class="overlay neonOverlay">
+    <div class="menuTop">
+      <div class="wallet">
+        <span>🪙 <b id="menuCoins">0</b></span>
+        <span>💎 <b id="menuGems">0</b></span>
+      </div>
+      <button id="menuMuteBtn" class="iconBtn" title="Sonido">🔊</button>
+    </div>
+
+    <div class="tag">Omnitrix Battle · 3D</div>
+    <h1 class="title">BEN <span class="ten">10</span></h1>
+    <p class="sub">Transformate. Peleá. Salvá el día.</p>
+
+    <!-- Perfil / nombre -->
+    <div id="profileBar" class="profileBar hidden">
+      <span class="profileLabel">Jugador:</span>
+      <span id="profileName" class="profileValue">—</span>
+      <button id="btnChangeName" class="iconBtn" title="Cambiar nombre">✏️</button>
+    </div>
+
+    <div class="menuBtns">
+      <button id="btnStory" class="btn big">📖 MODO HISTORIA</button>
+      <button id="btnFree" class="btn big">🌍 MODO LIBRE</button>
+      <div class="row">
+        <button id="btnRanking" class="btn">🏆 RANKING GLOBAL</button>
+        <button id="btnOptions" class="btn ghost">⚙️ OPCIONES</button>
+      </div>
+      <div class="row">
+        <button id="startBtn" class="btn big">▶ PARTIDA RÁPIDA</button>
+        <button id="shopBtn" class="btn">🛒 TIENDA</button>
+      </div>
+      <div class="row">
+        <button id="btnControls" class="btn">🎮 CONTROLES TÁCTILES</button>
+        <button id="btnFriends" class="btn">👥 AMIGOS</button>
+      </div>
+      <div class="row">
+        <button id="btnCharStore" class="btn">👤 PERSONAJES</button>
+      </div>
+    </div>
+
+    <div class="menuStats">
+      <div><span id="bestVal">0</span><small>RÉCORD</small></div>
+      <div><span id="bestWaveVal">0</span><small>MEJOR OLEADA</small></div>
+    </div>
+    <p class="hint">Cámara cenital 3D tipo GTA · 7 aliens · audio sintetizado sin internet</p>
+    <span class="version">v3.0 · Omnitrix Games</span>
+    <div class="credito">
+      Creado por <a href="https://verdix-oficial.vercel.app/" target="_blank">Verdix</a>
+    </div>
+  </div>
+
+  <!-- ================= PANTALLA DE PERFIL / NOMBRE ================= -->
+  <div id="profileScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Perfil de jugador</div>
+    <h1 class="title small">OMNITRIX ID</h1>
+    <p class="sub">Ingresá tu nombre para guardar tu progreso y aparecer en el ranking global.</p>
+
+    <div class="nameCard">
+      <label for="playerNameInput">Nombre</label>
+      <input type="text" id="playerNameInput" maxlength="16" placeholder="Ej: Yeremy">
+      <div class="nameHint">Mínimo 2 caracteres. Solo letras y números.</div>
+    </div>
+
+    <div class="profileActions row">
+      <button id="btnSaveName" class="btn big">💾 GUARDAR NOMBRE</button>
+      <button id="btnCancelName" class="btn ghost">VOLVER</button>
+    </div>
+
+    <div id="profileMsg" class="profileMsg hidden"></div>
+  </div>
+
+  <!-- ================= MODO HISTORIA ================= -->
+  <div id="storyScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Modo Historia</div>
+    <h1 class="title small">MISIONES OMNITRIX</h1>
+    <p class="sub">Completá los 3 niveles para desbloquear recompensas.</p>
+
+    <div id="storyLevels" class="storyGrid"></div>
+
+    <div class="storyActions row">
+      <button id="btnBackStory" class="btn big ghost">VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ================= RANKING GLOBAL ================= -->
+  <div id="rankingScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Ranking Global</div>
+    <h1 class="title small">TOP 10 JUGADORES</h1>
+    <p class="sub">Puntajes sincronizados con Firebase</p>
+
+    <div id="rankingList" class="rankingList">
+      <div class="rankingRow placeholder">Cargando ranking...</div>
+    </div>
+
+    <div id="rankingStatus" class="rankingStatus hidden"></div>
+
+    <div class="storyActions row">
+      <button id="btnRefreshRanking" class="btn">🔄 ACTUALIZAR</button>
+      <button id="btnBackRanking" class="btn big ghost">VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ================= PERSONALIZAR CONTROLES TÁCTILES ================= -->
+  <div id="controlsScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Personalizar Controles</div>
+    <h1 class="title small">CONTROLES TÁCTILES</h1>
+    <p class="sub">Arrastra los botones para moverlos. Usa los deslizadores para cambiar el tamaño.</p>
+
+    <div class="controlsPreview" id="controlsPreview">
+      <!-- Los controles táctiles se clonarán aquí para editar -->
+    </div>
+
+    <div class="controlsSettings">
+      <div class="optRow">
+        <span>Tamaño joystick</span>
+        <input type="range" id="ctrlStickSize" min="60" max="180" value="118">
+      </div>
+      <div class="optRow">
+        <span>Tamaño botones acción</span>
+        <input type="range" id="ctrlBtnSize" min="40" max="120" value="68">
+      </div>
+      <div class="optRow">
+        <span>Escala general</span>
+        <input type="range" id="ctrlScale" min="50" max="200" value="100">
+      </div>
+      <div class="optRow">
+        <span>Posición: Izquierda / Derecha</span>
+        <button id="ctrlLayoutLeft" class="btn">Izquierda</button>
+        <button id="ctrlLayoutRight" class="btn">Derecha</button>
+      </div>
+    </div>
+
+    <div class="storyActions row">
+      <button id="btnResetControls" class="btn ghost">↻ RESTABLECER</button>
+      <button id="btnSaveControls" class="btn big">💾 GUARDAR</button>
+      <button id="btnBackControls" class="btn big ghost">VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ================= OPCIONES ================= -->
+  <div id="optionsScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Opciones</div>
+    <h1 class="title small">CONFIGURACIÓN</h1>
+
+    <div class="optionsList">
+      <div class="optRow">
+        <span>Sonido</span>
+        <button id="optMuteBtn" class="optBtn">🔊 Activado</button>
+      </div>
+      <div class="optRow">
+        <span>Calidad gráfica</span>
+        <button id="optQualityBtn" class="optBtn">Alta</button>
+      </div>
+      <div class="optRow">
+        <span>Modo Dios (creador)</span>
+        <button id="optGodBtn" class="optBtn hidden">Activado</button>
+      </div>
+    </div>
+
+    <div class="adminPanel hidden" id="adminPanel">
+      <div class="adminHeader">
+        <span class="adminTitle">👑 Panel de Administrador</span>
+        <span class="adminRole">Moderadores</span>
+      </div>
+      <div class="adminList" id="adminList"></div>
+      <div class="adminInputRow">
+        <input type="text" id="adminNameInput" placeholder="Nombre de moderador">
+        <button id="btnAddMod" class="btn">➕ AGREGAR MOD</button>
+        <button id="btnBackAdmin" class="btn ghost">VOLVER</button>
+      </div>
+      <p class="adminHint">Solo el creador puede agregar moderadores.</p>
+    </div>
+
+    <div class="storyActions row">
+      <button id="btnBackOptions" class="btn big ghost">VOLVER AL MENÚ</button>
+    </div>
+  </div>
+
+  <!-- ================= TIENDA ================= -->
+  <div id="shop" class="overlay neonOverlay hidden">
+    <div class="shopHead">
+      <div>
+        <div class="tag">Cuartel general</div>
+        <h2 class="shopTitle">TIENDA OMNITRIX</h2>
+      </div>
+      <div class="shopWallet">
+        <span>🪙 <b id="shopCoins">0</b></span>
+        <span>💎 <b id="shopGems">0</b></span>
+        <button id="shopClose" class="iconBtn" title="Cerrar">✕</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="upgrades">Mejoras</button>
+      <button class="tab" data-tab="aliens">Aliens</button>
+      <button class="tab" data-tab="modules">Módulos</button>
+      <button class="tab" data-tab="drops">Probabilidades</button>
+    </div>
+    <div id="shopGrid" class="shopGrid"></div>
+    <p class="shopHint">Ganá monedas y cristales derrotando enemigos y jefes.</p>
+  </div>
+
+  <!-- ================= TIENDA DE PERSONAJES ================= -->
+  <div id="charStoreScreen" class="overlay neonOverlay hidden">
+    <div class="tag">Tienda de Personajes</div>
+    <h1 class="title small">PERSONAJES OMNITRIX</div>
+    <p class="sub">Desbloquea personajes con monedas 🪙 o diamantes 💎</p>
+
+    <div id="charStore" class="charStore"></div>
+
+    <div class="storyActions row">
+      <button id="btnBackCharStore" class="btn big ghost">VOLVER</button>
+    </div>
+  </div>
+
+  <!-- ================= DIÁLOGO NPC ================= -->
+  <div id="npcDialog" class="npcDialog hidden">
+    <div class="npcName" id="npcName"></div>
+    <div class="npcText" id="npcText"></div>
+    <div class="npcNext">Haz clic para continuar ▶</div>
+  </div>
+
+  <!-- ================= AYUDA ================= -->
+  <div id="help" class="overlay neonOverlay hidden">
+    <div class="tag">Manual de campo</div>
+    <h2 class="shopTitle">CÓMO JUGAR</h2>
+    <div class="helpGrid">
+      <div class="helpCard">
+        <h3>Teclado</h3>
+        <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> moverte · <kbd>J</kbd>/<kbd>ESPACIO</kbd> golpear</p>
+        <p><kbd>K</kbd> poder especial · <kbd>SHIFT</kbd> esquiva</p>
+        <p><kbd>1</kbd>–<kbd>7</kbd> transformarte · <kbd>E</kbd> volver a Ben</p>
+        <p><kbd>P</kbd> pausa · <kbd>M</kbd> silenciar</p>
+        <p><kbd>D</kbd> ×5 Modo Dios (creador)</p>
+      </div>
+      <div class="helpCard">
+        <h3>Táctil</h3>
+        <p>Joystick para moverte, botones GOLPE / PODER / ESQUIVA.</p>
+        <p>Tocá las tarjetas de aliens para transformarte.</p>
+      </div>
+      <div class="helpCard">
+        <h3>Omnitrix</h3>
+        <p>Estar transformado gasta energía. Al volver a Ben se recarga.</p>
+      </div>
+    </div>
+    <button id="helpClose" class="btn ghost">VOLVER</button>
+  </div>
+
+  <!-- ================= PAUSA ================= -->
+  <div id="pause" class="overlay neonOverlay hidden">
+    <div class="tag">Misión en pausa</div>
+    <h1 class="title small">EN <span class="ten">PAUSA</span></h1>
+    <div class="menuBtns">
+      <button id="resumeBtn" class="btn big">CONTINUAR</button>
+      <div class="row">
+        <button id="pauseShopBtn" class="btn">🛒 TIENDA</button>
+        <button id="quitBtn" class="btn ghost">SALIR AL MENÚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FIN ================= -->
+  <div id="over" class="overlay neonOverlay hidden">
+    <div class="tag" id="overTag">Misión terminada</div>
+    <h1 class="title small" id="overTitle">DERROTA</h1>
+    <p class="sub" id="overMsg">Los monstruos te superaron.</p>
+    <div class="stats">
+      <div><span id="overWave">0</span><small>OLEADA</small></div>
+      <div><span id="overScore">0</span><small>PUNTOS</small></div>
+      <div><span id="overBest">0</span><small>RÉCORD</small></div>
+    </div>
+    <div class="reward">
+      <span>🪙 +<b id="runCoins">0</b></span>
+      <span>💎 +<b id="runGems">0</b></span>
+    </div>
+    <div class="menuBtns">
+      <button id="retryBtn" class="btn big">REINTENTAR</button>
+      <div class="row">
+        <button id="overShopBtn" class="btn">🛒 TIENDA</button>
+        <button id="menuBtn" class="btn ghost">MENÚ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CARGA ================= -->
+  <div id="boot">
+    <div class="omnitrixSpinner"></div>
+    <strong>INICIANDO OMNITRIX</strong>
+    <span>Preparando el modo 3D…</span>
+  </div>
+</div>
+
+<!-- ================= FIREBASE SDK v13.2.0 (modular) ================= -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
+  import { getDatabase, ref, push, onValue, orderByChild, limitToLast, query, set, get, child } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js';
+
+  // Configuración del proyecto Firebase: ben10omnitrix-16d31
+  // Reemplazá estos valores con los reales de tu consola de Firebase.
+  const firebaseConfig = {
+    apiKey: "AIzaSyPLACEHOLDER_REEMPLAZAR",
+    authDomain: "ben10omnitrix-16d31.firebaseapp.com",
+    databaseURL: "https://ben10omnitrix-16d31-default-rtdb.firebaseio.com",
+    projectId: "ben10omnitrix-16d31",
+    storageBucket: "ben10omnitrix-16d31.appspot.com",
+    messagingSenderId: "PLACEHOLDER_SENDER_ID",
+    appId: "1:PLACEHOLDER_APP_ID:web:PLACEHOLDER"
+  };
+
+  // Exportamos para uso global en los demás scripts
+  window.firebaseConfig = firebaseConfig;
+  window.firebaseDb = null;
+  window.firebaseReady = false;
+  window.firebaseError = null;
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    window.firebaseDb = getDatabase(app);
+    window.firebaseReady = true;
+    console.log('[Firebase] Inicializado correctamente');
+  } catch (e) {
+    window.firebaseError = e.message;
+    console.error('[Firebase] Error al inicializar:', e);
+  }
+</script>
+
+<script src="three.min.js"></script>
+<script src="save.js"></script>
+<script src="audio.js"></script>
+<script src="engine.js"></script>
+<script src="models.js"></script>
+<script src="data.js"></script>
+<script src="game.js"></script>
+<script src="combat.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

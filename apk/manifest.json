@@ -1,0 +1,13 @@
+{
+  "name": "Verdix Browser",
+  "short_name": "Verdix",
+  "description": "Navegador futurista optimizado para todo tipo de PC y dispositivos móviles.",
+  "start_url": "/browser.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#00ff41",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
