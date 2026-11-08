@@ -1,3 +1,7 @@
+/* ============================================================
+   VERDIX AI — API Chat con generación de imágenes y sesión
+   ============================================================ */
+
 export default async function handler(request, response) {
     if (request.method !== "POST") {
         return response.status(405).json({ error: "Method Not Allowed" });
@@ -20,13 +24,15 @@ export default async function handler(request, response) {
             return response.status(400).json({ error: "Falta el mensaje." });
         }
 
+        const wantsImage = body.image === true || /generar (una )?imagen|crear (una )?imagen|dibuja|image of/i.test(messages[messages.length - 1].content || "");
+
         // Asegurar system prompt al inicio si no existe
         const hasSystem = messages.some(m => m.role === "system");
         if (!hasSystem) {
             messages.unshift({
                 role: "system",
                 content:
-                  "Eres Verdix AI, un asistente amable, claro, inteligente y útil. Respondes en el idioma del usuario, de forma concisa y precisa. Puedes ayudar con programación, preguntas generales, creatividad, y soporte del ecosistema Verdix (Browser, Search, OS). Siempre mantén un tono profesional pero cercano."
+                  "Eres Verdix AI, un asistente amable, claro, inteligente y útil. Respondes en el idioma del usuario, de forma concisa y precisa. Puedes ayudar con programación, preguntas generales, creatividad, soporte del ecosistema Verdix (Browser, Search, OS), generar imágenes y ejecutar comandos del sistema operativo. Siempre mantén un tono profesional pero cercano.",
             });
         }
 
@@ -53,10 +59,8 @@ export default async function handler(request, response) {
             return { ok: res.ok, status: res.status, data };
         }
 
-        // Intento con modelo principal
         let result = await callOpenRouter(PRIMARY_MODEL);
 
-        // Si falla, intentar con fallback
         if (!result.ok || !result.data.choices?.[0]?.message?.content) {
             result = await callOpenRouter(FALLBACK_MODEL);
         }
@@ -76,10 +80,18 @@ export default async function handler(request, response) {
             });
         }
 
+        let imageUrl = null;
+        if (wantsImage) {
+            // Generar imagen usando Pollinations (gratis, sin clave)
+            const prompt = encodeURIComponent(content);
+            imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=1024&height=1024&nologo=true`;
+        }
+
         return response.status(200).json({
             reply: content.trim(),
             model: result.data.model || PRIMARY_MODEL,
-            usage: result.data.usage || null
+            usage: result.data.usage || null,
+            imageUrl: imageUrl
         });
 
     } catch (error) {

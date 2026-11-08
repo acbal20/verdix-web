@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Verdix — El Futuro es Verde</title>
-  <meta name="description" content="Verdix es un ecosistema futurista: navegador, buscador, inteligencia artificial y un sistema operativo ligero para cualquier PC." />
-  <meta name="theme-color" content="#04070a" />
+  <title>Verdix — Ecosistema Futurista</title>
+  <meta name="description" content="Verdix es un ecosistema futurista: navegador, buscador, inteligencia artificial y sistema operativo ligero para cualquier PC." />
+  <meta name="theme-color" content="#030609" />
   <link rel="icon" type="image/png" href="/icon-192.png" />
   <link rel="apple-touch-icon" href="/icon-192.png" />
   <link rel="manifest" href="/manifest.json" />
-  <meta property="og:title" content="Verdix — El Futuro es Verde" />
-  <meta property="og:description" content="Navegador, buscador, IA y sistema operativo en un solo ecosistema. Descargá Verdix para Android, Windows o usalo desde la web." />
+  <meta property="og:title" content="Verdix — Ecosistema Futurista" />
+  <meta property="og:description" content="Navegador, buscador, IA y sistema operativo en un solo ecosistema." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="assets/icons/icon-512.png" />
+  <meta property="og:image" content="/assets/icons/icon-512.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,11 +20,10 @@
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header" id="header">
     <div class="wrap header-inner">
       <a class="brand" href="index.html">
-        <span class="brand-mark">∞</span>
-        VERDIX
+        <span class="brand-mark">∞</span> VERDIX
       </a>
       <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
       <nav class="nav">
@@ -40,9 +39,10 @@
   </header>
 
   <main>
+    <!-- Hero -->
     <section class="hero">
       <div class="wrap hero-grid">
-        <div>
+        <div class="reveal">
           <span class="badge"><span class="dot"></span> Ecosistema Verdix 2026</span>
           <h1>El futuro es <span class="grad">verde</span>.</h1>
           <p class="lead">
@@ -51,7 +51,7 @@
           </p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="browser.html">🌐 Abrir Verdix Browser</a>
-            <a class="btn btn-ghost" href="#ecosistema">Explorar el ecosistema</a>
+            <a class="btn btn-ghost" href="#ecosistema">Explorar ecosistema</a>
           </div>
           <div class="hero-stats">
             <div class="stat"><b>5</b><span>PRODUCTOS</span></div>
@@ -60,7 +60,7 @@
           </div>
         </div>
 
-        <div class="orb-wrap" aria-hidden="true">
+        <div class="orb-wrap reveal" aria-hidden="true">
           <div class="orb">
             <div class="ring r1"><span class="sat"></span></div>
             <div class="ring r2"></div>
@@ -70,38 +70,40 @@
       </div>
     </section>
 
-    <section id="accesos-rapidos" style="background: rgba(0, 255, 65, 0.03); border-top: 1px solid rgba(0, 255, 65, 0.1); border-bottom: 1px solid rgba(0, 255, 65, 0.1);">
+    <!-- Accesos rápidos -->
+    <section id="accesos-rapidos">
       <div class="wrap">
         <div class="section-head reveal" style="text-align:center; margin-bottom: 30px;">
           <span class="eyebrow">Accesos rápidos</span>
           <h2>Tu puerta de entrada al ecosistema</h2>
           <p>Accedé directamente a las herramientas principales de Verdix.</p>
         </div>
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-          <a class="card reveal" href="browser.html" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:160px;">
-            <div class="icon" style="font-size:2.5rem; width:72px; height:72px; background:linear-gradient(140deg,rgba(0,255,65,0.2),rgba(0,204,51,0.05)); border-color:rgba(0,255,65,0.3);">🌐</div>
-            <h3 style="margin:0;">Verdix Browser</h3>
-            <p style="margin:0; font-size:0.9rem; color:var(--muted);">Navegador futurista multiplataforma</p>
+        <div class="grid">
+          <a class="card reveal" href="browser.html">
+            <div class="icon">🌐</div>
+            <h3>Verdix Browser</h3>
+            <p>Navegador futurista multiplataforma</p>
           </a>
-          <a class="card reveal" href="search.html" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:160px;">
-            <div class="icon" style="font-size:2.5rem; width:72px; height:72px; background:linear-gradient(140deg,rgba(0,255,65,0.2),rgba(0,204,51,0.05)); border-color:rgba(0,255,65,0.3);">🔍</div>
-            <h3 style="margin:0;">Verdix Search</h3>
-            <p style="margin:0; font-size:0.9rem; color:var(--muted);">Buscador web propio con Brave</p>
+          <a class="card reveal" href="search.html">
+            <div class="icon">🔍</div>
+            <h3>Verdix Search</h3>
+            <p>Buscador web propio con Brave</p>
           </a>
-          <a class="card reveal" href="ai.html" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:160px;">
-            <div class="icon" style="font-size:2.5rem; width:72px; height:72px; background:linear-gradient(140deg,rgba(0,255,65,0.2),rgba(0,204,51,0.05)); border-color:rgba(0,255,65,0.3);">🧠</div>
-            <h3 style="margin:0;">Verdix AI</h3>
-            <p style="margin:0; font-size:0.9rem; color:var(--muted);">IA con Nemotron 3 Ultra (1M ctx)</p>
+          <a class="card reveal" href="ai.html">
+            <div class="icon">🧠</div>
+            <h3>Verdix AI</h3>
+            <p>IA con Nemotron 3 Ultra</p>
           </a>
-          <a class="card reveal" href="download.html" style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:160px;">
-            <div class="icon" style="font-size:2.5rem; width:72px; height:72px; background:linear-gradient(140deg,rgba(0,255,65,0.2),rgba(0,204,51,0.05)); border-color:rgba(0,255,65,0.3);">⬇</div>
-            <h3 style="margin:0;">Descargas</h3>
-            <p style="margin:0; font-size:0.9rem; color:var(--muted);">OS, Windows, Android</p>
+          <a class="card reveal" href="download.html">
+            <div class="icon">⬇</div>
+            <h3>Descargas</h3>
+            <p>OS, Windows, Android</p>
           </a>
         </div>
       </div>
     </section>
 
+    <!-- Ecosistema -->
     <section id="ecosistema">
       <div class="wrap">
         <div class="section-head reveal">
@@ -141,25 +143,36 @@
             </div>
           </article>
 
-          <article class="card reveal" id="os">
+          <article class="card reveal" id="os-card">
             <div class="icon">💻</div>
             <h3>Verdix OS</h3>
-            <p>Un sistema operativo ligero, gráfico y futurista. Ideal para PCs de bajos recursos.</p>
+            <p>Sistema operativo ligero, gráfico y futurista. Compatible con GPT y MBR.</p>
             <div class="card-foot">
               <a class="btn btn-ghost" href="#os">Ver progreso</a>
               <span class="tag soon">En desarrollo</span>
+            </div>
+          </article>
+
+          <article class="card reveal">
+            <div class="icon">🧒</div>
+            <h3>Ben 10: Omnitrix Battle</h3>
+            <p>Juego 3D con Three.js. Transformate en aliens, peleá oleadas y completá misiones.</p>
+            <div class="card-foot">
+              <a class="btn btn-primary" href="apk/juego/index.html">Jugar ahora</a>
+              <span class="tag">Web</span>
             </div>
           </article>
         </div>
       </div>
     </section>
 
+    <!-- Descargas -->
     <section id="descargas">
       <div class="wrap">
         <div class="section-head reveal">
           <span class="eyebrow">Descargas</span>
           <h2>Llevá Verdix a todos tus dispositivos.</h2>
-          <p>Instalá Verdix Browser como app nativa o usalo al instante desde la web. Sin cuentas, sin anuncios.</p>
+          <p>Instalá Verdix Browser como app nativa o usalo al instante desde la web.</p>
         </div>
 
         <div class="downloads-grid">
@@ -216,11 +229,12 @@
         </div>
 
         <p class="download-note">
-          ¿Buscás el sistema operativo? <a href="download.html#os">Mirá el estado de Verdix OS →</a>
+          ¿Buscás el sistema operativo? <a href="#os">Mirá el estado de Verdix OS →</a>
         </p>
       </div>
     </section>
 
+    <!-- Por qué Verdix -->
     <section>
       <div class="wrap">
         <div class="section-head reveal">
@@ -241,7 +255,7 @@
           <div class="feature reveal">
             <div class="icon">🎨</div>
             <h4>Diseño futurista</h4>
-            <p>Una interfaz limpia, oscura y verde que se siente del futuro.</p>
+            <p>Interfaz limpia, oscura y verde que se siente del futuro.</p>
           </div>
           <div class="feature reveal">
             <div class="icon">📱</div>
@@ -253,15 +267,11 @@
             <h4>Todo integrado</h4>
             <p>Browser, Search y AI conectados en una sola experiencia.</p>
           </div>
-          <div class="feature reveal">
-            <div class="icon">🚀</div>
-            <h4>En evolución</h4>
-            <p>Actualizaciones constantes con nuevas funciones y mejoras.</p>
-          </div>
         </div>
       </div>
     </section>
 
+    <!-- Novedades -->
     <section id="novedades">
       <div class="wrap">
         <div class="section-head reveal">
@@ -293,6 +303,7 @@
       </div>
     </section>
 
+    <!-- FAQ -->
     <section id="faq">
       <div class="wrap">
         <div class="section-head reveal">
@@ -317,14 +328,11 @@
             <summary>¿Puedo usar Verdix sin conexión?</summary>
             <p>La app web funciona como PWA y guarda una copia de la interfaz. Las búsquedas y la IA sí necesitan internet.</p>
           </details>
-          <details class="faq-item reveal">
-            <summary>¿Dónde están mis datos?</summary>
-            <p>Tus conversaciones e historial quedan en tu dispositivo. No vendemos ni compartimos información personal.</p>
-          </details>
         </div>
       </div>
     </section>
 
+    <!-- CTA -->
     <section>
       <div class="wrap">
         <div class="cta-band reveal">
