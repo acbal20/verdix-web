@@ -951,3 +951,89 @@ section { padding: 70px 0; }
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   ADAPTACIÓN POR DISPOSITIVO (Auto-detectado por JS)
+   ============================================================ */
+
+.device-mobile #wrap {
+  width: 100vw !important;
+  height: 100vh !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+  overflow-y: auto !important;
+}
+
+.device-mobile .hero-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.device-mobile .grid,
+.device-mobile .features {
+  grid-template-columns: 1fr !important;
+}
+
+.device-mobile .downloads-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.device-mobile #wrap canvas {
+  width: 100vw !important;
+  height: auto !important;
+  max-height: 70vh !important;
+}
+
+.device-touch .btn-input.primary {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 1.3rem !important;
+}
+
+.device-touch .chat-input textarea {
+  min-height: 48px !important;
+  font-size: 1rem !important;
+}
+
+/* iOS Safari ajustes */
+.device-ios .hero h1 {
+  font-size: clamp(2rem, 5vw, 3rem) !important;
+}
+
+.device-android .orb-wrap {
+  min-height: 240px !important;
+}
+
+/* Tablet */
+.device-tablet .hero-grid {
+  grid-template-columns: 1fr 1fr !important;
+}
+
+/* Alto contraste */
+.high-contrast .bar.hp > div {
+  background: #00ff41 !important;
+  box-shadow: 0 0 20px #00ff41 !important;
+}
+
+.high-contrast .bar.omni > div {
+  background: #00cc33 !important;
+  box-shadow: 0 0 20px #00cc33 !important;
+}
+
+/* Reducir movimiento */
+.reduce-motion .orb {
+  animation: none !important;
+}
+.reduce-motion .ring {
+  animation: none !important;
+}
+.reduce-motion .btn:hover {
+  transform: none !important;
+}
+
+/* Modo PWA instalado */
+.standalone .site-header {
+  padding-top: env(safe-area-inset-top);
+}
+.standalone #wrap {
+  height: 100dvh;
+}

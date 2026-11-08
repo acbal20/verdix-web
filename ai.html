@@ -27,6 +27,7 @@
     .user-info .avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1px solid var(--panel-border); }
     .user-info .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .btn-ghost { font-size: 0.85rem; padding: 6px 12px; }
+
     /* Toast */
     #toast {
       position: fixed; left: 50%; bottom: 28px; z-index: 200;
@@ -37,10 +38,311 @@
       opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease;
     }
     #toast.show { opacity: 1; transform: translate(-50%, 0); }
-    /* Imagen generada */
+
+    /* Chat layout */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-height: 85vh;
+    }
+
+    /* Sidebar de chats */
+    .chat-sidebar {
+      position: fixed;
+      top: 72px;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      border-right: 1px solid var(--panel-border);
+      background: linear-gradient(180deg, rgba(8, 16, 22, 0.95), rgba(2, 6, 5, 0.98));
+      z-index: 30;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      padding-top: 10px;
+    }
+    .chat-sidebar.open {
+      transform: translateX(0);
+    }
+    .chat-sidebar-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-list {
+      padding: 8px;
+    }
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+    .chat-item:hover {
+      background: rgba(0, 255, 65, 0.08);
+    }
+    .chat-item.active {
+      background: rgba(0, 255, 65, 0.15);
+      border-left: 3px solid var(--green);
+    }
+    .chat-item-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .chat-item-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .btn-new-chat {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--panel-border);
+      background: rgba(0, 255, 65, 0.08);
+      color: var(--green);
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: var(--transition);
+    }
+    .btn-new-chat:hover {
+      background: rgba(0, 255, 65, 0.15);
+    }
+
+    /* Área principal de chat */
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .chat-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    /* Mensajes */
+    .msg {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: rise 0.25s ease;
+    }
+    .msg .avatar {
+      flex: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      background: rgba(0, 255, 65, 0.12);
+      border: 1px solid var(--panel-border);
+    }
+    .msg .bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      line-height: 1.6;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .msg.user .avatar {
+      background: rgba(0, 204, 51, 0.12);
+    }
+    .msg.user .bubble {
+      background: linear-gradient(135deg, rgba(0, 255, 65, 0.18), rgba(0, 204, 51, 0.1));
+      border-color: rgba(0, 255, 65, 0.25);
+    }
+    .msg.error .bubble {
+      border-color: rgba(255, 92, 122, 0.4);
+      color: #ffc2cd;
+    }
+    .msg.system {
+      max-width: 100%;
+      justify-content: center;
+    }
+    .msg.system .bubble {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.06);
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
     .msg img.generated-img {
-      max-width: 100%; border-radius: 12px; margin-top: 10px;
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 12px;
+      margin-top: 10px;
       box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+      display: block;
+    }
+
+    /* Input */
+    .chat-input {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(180deg, rgba(2, 6, 5, 0.9), rgba(3, 6, 9, 0.6));
+    }
+    .chat-input textarea {
+      flex: 1;
+      resize: none;
+      max-height: 120px;
+      min-height: 44px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--panel-border);
+      outline: none;
+      line-height: 1.4;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    .chat-input textarea::placeholder {
+      color: var(--muted);
+    }
+    .chat-input textarea:focus {
+      border-color: rgba(0, 255, 65, 0.5);
+      box-shadow: 0 0 0 4px rgba(0, 255, 65, 0.1);
+    }
+    .input-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-input {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(0, 255, 65, 0.1);
+      color: var(--green);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-input:hover {
+      background: rgba(0, 255, 65, 0.2);
+    }
+    .btn-input.primary {
+      background: linear-gradient(120deg, var(--green), var(--green-2));
+      color: #03130c;
+      width: 48px;
+      height: 48px;
+      font-size: 1.2rem;
+    }
+    .btn-input.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px -8px rgba(0, 255, 65, 0.7);
+    }
+    .btn-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Archivo adjunto */
+    .file-attach {
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(0, 255, 65, 0.05);
+      border: 1px dashed rgba(0, 255, 65, 0.3);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .file-attach:hover {
+      background: rgba(0, 255, 65, 0.1);
+    }
+
+    /* Typing */
+    .typing {
+      display: inline-flex;
+      gap: 5px;
+    }
+    .typing i {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); animation: blink 1.2s infinite;
+    }
+    .typing i:nth-child(2) { animation-delay: 0.2s; }
+    .typing i:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Overlay mobile */
+    .mobile-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 25;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+    .mobile-overlay.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .chat-sidebar {
+        position: fixed;
+        z-index: 30;
+      }
+      .mobile-overlay {
+        z-index: 25;
+      }
+      .chat-main {
+        width: 100%;
+      }
+      .chat-content {
+        padding: 16px;
+      }
+      .msg {
+        max-width: 90%;
+      }
     }
   </style>
 </head>
@@ -49,8 +351,15 @@
     <div class="wrap header-inner">
       <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
       <div class="auth-row">
-        <button class="btn btn-ghost" id="btn-google-login" onclick="verdixAI.login()">Iniciar con Google</button>
-        <div class="user-info" id="user-info"></div>
+        <button class="btn btn-ghost" id="btn-auth" onclick="toggleAuth()">Iniciar sesión</button>
+        <div class="user-info" id="user-info" style="display:none;">
+          <div class="avatar" id="user-avatar">👤</div>
+          <div class="user-details">
+            <div id="user-name" style="font-weight:600; color:var(--text);">Usuario</div>
+            <div id="user-email" style="font-size:0.78rem; color:var(--muted);">correo@ejemplo.com</div>
+          </div>
+          <button class="btn-ghost" onclick="VerdixAuth.logout(); location.reload();" style="font-size:0.75rem;">Salir</button>
+        </div>
       </div>
       <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
       <nav class="nav">
@@ -65,26 +374,40 @@
   </header>
 
   <main class="tool-page">
-    <div class="wrap" style="max-width:820px">
-      <div class="tool-head">
-        <span class="eyebrow">Verdix AI · Beta</span>
-        <h1>Preguntá lo que quieras.</h1>
-        <p>Tu asistente futurista, listo para ayudarte. Podés pedir imágenes, código, comandos y más.</p>
-      </div>
+    <div class="wrap" style="max-width:1400px; padding:0;">
+      <!-- Sidebar móvil -->
+      <div class="mobile-overlay" id="mobile-overlay" onclick="toggleSidebar(false)"></div>
 
-      <div class="panel">
-        <div class="chat">
-          <div class="chat-log" id="chat-log">
-            <div class="msg bot">
-              <div class="avatar">∞</div>
-              <div class="bubble">¡Hola! Soy Verdix AI. ¿En qué puedo ayudarte?</div>
-            </div>
+      <aside class="chat-sidebar" id="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <div style="font-weight:700; color:var(--text);">Conversaciones</div>
+          <button class="btn btn-ghost" onclick="toggleSidebar(false)" style="padding:4px 8px; font-size:0.8rem;">Cerrar</button>
+        </div>
+        <div class="chat-list" id="chat-list"></div>
+        <button class="btn-new-chat" onclick="createNewChat()">+ Nueva conversación</button>
+      </aside>
+
+      <div class="chat-main">
+        <div class="chat-content" id="chat-content">
+          <div class="empty-state">
+            <div class="empty-state-icon">🧠</div>
+            <h3>Inicia una conversación</h3>
+            <p>Selecciona una conversación o crea una nueva para empezar a chatear con Verdix AI.</p>
+            <p style="font-size:0.85rem; margin-top:12px; color:var(--muted);">Puedes generar imágenes, ejecutar comandos, instalar paquetes y más.</p>
           </div>
+        </div>
 
-          <form class="chat-input" id="chat-form">
-            <textarea id="chat-text" rows="1" placeholder="Escribí tu mensaje (ej: 'generar una imagen de un gato cyberpunk')..." aria-label="Mensaje"></textarea>
-            <button class="send-btn" type="submit" id="send-btn" aria-label="Enviar">➤</button>
-          </form>
+        <div class="chat-input">
+          <div class="input-actions">
+            <button class="btn-input" id="btn-attach" title="Adjuntar archivo">📎</button>
+            <input type="file" id="file-input" style="display:none;" multiple accept="image/*,text/*,application/json,application/pdf,.zip">
+          </div>
+          <textarea id="chat-text" rows="1" placeholder="Escribí tu mensaje..." aria-label="Mensaje"></textarea>
+          <button class="btn-input primary" id="send-btn" type="button" aria-label="Enviar">➤</button>
+        </div>
+        <div class="file-attach" id="file-attach" style="display:none;">
+          <span id="file-name">Ningún archivo seleccionado</span>
+          <span onclick="clearFile()" style="cursor:pointer; color:#ff5c7a;">✕</span>
         </div>
       </div>
     </div>
@@ -107,6 +430,357 @@
   </footer>
 
   <script src="assets/js/app.js"></script>
-  <script src="assets/js/ai.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/security.js"></script>
+  <script>
+    // Estado de la aplicación
+    let currentChatId = null;
+    let isSending = false;
+    let selectedFile = null;
+
+    // Elementos DOM
+    const chatContent = document.getElementById("chat-content");
+    const chatList = document.getElementById("chat-list");
+    const chatText = document.getElementById("chat-text");
+    const sendBtn = document.getElementById("send-btn");
+    const chatForm = document.getElementById("chat-form") || document.createElement("form");
+    const fileInput = document.getElementById("file-input");
+    const fileAttach = document.getElementById("file-attach");
+    const fileName = document.getElementById("file-name");
+    const btnAttach = document.getElementById("btn-attach");
+    const btnAuth = document.getElementById("btn-auth");
+    const userInfo = document.getElementById("user-info");
+    const userName = document.getElementById("user-name");
+    const userEmail = document.getElementById("user-email");
+    const userAvatar = document.getElementById("user-avatar");
+    const mobileOverlay = document.getElementById("mobile-overlay");
+    const chatSidebar = document.getElementById("chat-sidebar");
+
+    // Inicializar
+    function init() {
+      // Autenticación
+      updateAuthUI();
+
+      // Eventos
+      sendBtn.addEventListener("click", () => sendMessage());
+      chatText.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      chatText.addEventListener("input", () => {
+        chatText.style.height = "auto";
+        chatText.style.height = Math.min(chatText.scrollHeight, 140) + "px";
+      });
+
+      // Archivo
+      btnAttach.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files[0]) {
+          const file = e.target.files[0];
+          const validation = VerdixAuth.validateFile(file);
+          if (!validation.valid) {
+            showToast(validation.error, "error");
+            fileInput.value = "";
+            return;
+          }
+          selectedFile = file;
+          fileName.textContent = file.name + " (" + (file.size / 1024 / 1024).toFixed(2) + " MB)";
+          fileAttach.style.display = "flex";
+        }
+      });
+
+      // Sidebar móvil
+      mobileOverlay.addEventListener("click", () => toggleSidebar(false));
+
+      // Cargar chats existentes
+      renderChatList();
+
+      // Si no hay chat, crear uno nuevo
+      if (VerdixAuth.getChats().length === 0) {
+        createNewChat();
+      } else {
+        // Cargar el primer chat
+        const firstChat = VerdixAuth.getChats()[0];
+        loadChat(firstChat.id);
+      }
+    }
+
+    // Autenticación
+    function updateAuthUI() {
+      const user = VerdixAuth.getCurrentUser();
+      if (user && VerdixAuth.isAuthenticated()) {
+        btnAuth.style.display = "none";
+        userInfo.style.display = "flex";
+        userName.textContent = user.name;
+        userEmail.textContent = user.email;
+        if (user.photo) {
+          userAvatar.innerHTML = '<img src="' + user.photo + '">';
+        } else {
+          userAvatar.textContent = "👤";
+        }
+      } else {
+        btnAuth.style.display = "flex";
+        userInfo.style.display = "none";
+      }
+    }
+
+    async function toggleAuth() {
+      if (VerdixAuth.isAuthenticated()) {
+        VerdixAuth.logout();
+        updateAuthUI();
+        showToast("Sesión cerrada");
+      } else {
+        try {
+          await VerdixAuth.loginWithGoogle();
+          updateAuthUI();
+          showToast("Sesión iniciada como " + VerdixAuth.getCurrentUser().name);
+        } catch (e) {
+          showToast(e.message || "Error al iniciar sesión", "error");
+        }
+      }
+    }
+
+    // Chat
+    function createNewChat() {
+      const chat = VerdixAuth.createChat();
+      currentChatId = chat.id;
+      renderChatList();
+      renderMessages(chat);
+      chatContent.scrollTop = chatContent.scrollHeight;
+      chatText.focus();
+      toggleSidebar(false);
+    }
+
+    function loadChat(chatId) {
+      currentChatId = chatId;
+      const chat = VerdixAuth.getChat(chatId);
+      if (chat) {
+        renderMessages(chat);
+        renderChatList();
+        chatContent.scrollTop = chatContent.scrollHeight;
+        chatText.focus();
+        toggleSidebar(false);
+      }
+    }
+
+    function renderMessages(chat) {
+      chatContent.innerHTML = "";
+      if (!chat || !chat.messages || chat.messages.length === 0) {
+        chatContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🧠</div>
+            <h3>Inicia una conversación</h3>
+            <p>Escribí tu primer mensaje para comenzar.</p>
+          </div>
+        `;
+        return;
+      }
+
+      chat.messages.forEach((msg) => {
+        addMessageToDOM(msg.role, msg.content, msg.imageUrl, msg.timestamp, false);
+      });
+    }
+
+    function renderChatList() {
+      chatList.innerHTML = "";
+      const chats = VerdixAuth.getChats();
+      chats.forEach((chat) => {
+        const el = document.createElement("div");
+        el.className = "chat-item" + (currentChatId === chat.id ? " active" : "");
+        el.innerHTML = `
+          <div class="chat-item-title">${escapeHtml(chat.title || "Nueva conversación")}</div>
+          <div class="chat-item-time">${new Date(chat.updatedAt || chat.createdAt).toLocaleTimeString([], {hour: "2-digit", minute:"2-digit"})}</div>
+        `;
+        el.onclick = () => loadChat(chat.id);
+        el.oncontextmenu = (e) => {
+          e.preventDefault();
+          if(confirm("¿Eliminar esta conversación?")) {
+            VerdixAuth.deleteChat(chat.id);
+            if (currentChatId === chat.id) {
+              currentChatId = null;
+              const next = VerdixAuth.getChats()[0];
+              if (next) loadChat(next.id);
+              else {
+                currentChatId = VerdixAuth.createChat().id;
+                loadChat(currentChatId);
+              }
+            } else {
+              renderChatList();
+            }
+          }
+        };
+        chatList.appendChild(el);
+      });
+    }
+
+    function addMessageToDOM(role, content, imageUrl, timestamp, save = true) {
+      if (chatContent.querySelector(".empty-state")) {
+        chatContent.innerHTML = "";
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "msg " + role;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.textContent = role === "user" ? "🙂" : "∞";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+
+      // Renderizar markdown simple
+      let html = content
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+      html = html.replace(/```([\s\S]*?)```/g, (m, code) => '<pre><code>' + code.trim() + '</code></pre>');
+      html = html.replace(/^# (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/\n/g, "<br>");
+
+      bubble.innerHTML = html;
+
+      if (imageUrl) {
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.className = "generated-img";
+        img.alt = "Imagen generada";
+        bubble.appendChild(img);
+      }
+
+      wrap.appendChild(avatar);
+      wrap.appendChild(bubble);
+      chatContent.appendChild(wrap);
+      chatContent.scrollTop = chatContent.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = chatText.value.trim();
+      if (!text && !selectedFile) return;
+      if (isSending) return;
+
+      isSending = true;
+      sendBtn.disabled = true;
+      sendBtn.textContent = "⏳";
+
+      // Agregar mensaje del usuario
+      addMessageToDOM("user", text, null, null, true);
+      if (selectedFile) {
+        addMessageToDOM("system", "📎 Archivo adjunto: " + selectedFile.name + " (" + (selectedFile.size/1024/1024).toFixed(2) + " MB)", null, null, true);
+      }
+      chatText.value = "";
+      chatText.style.height = "auto";
+      selectedFile = null;
+      fileAttach.style.display = "none";
+      fileInput.value = "";
+
+      // Guardar mensaje de usuario
+      if (currentChatId) {
+        VerdixAuth.addMessageToChat(currentChatId, { role: "user", content: text, file: selectedFile ? selectedFile.name : null });
+      }
+
+      // Mostrar typing
+      const typingWrap = document.createElement("div");
+      typingWrap.className = "msg bot";
+      typingWrap.id = "typing-msg";
+      typingWrap.innerHTML = '<div class="avatar">∞</div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+      chatContent.appendChild(typingWrap);
+      chatContent.scrollTop = chatContent.scrollHeight;
+
+      try {
+        // Preparar datos para enviar
+        const messages = [];
+        const chat = VerdixAuth.getChat(currentChatId);
+        if (chat && chat.messages) {
+          chat.messages.slice(-10).forEach(m => {
+            if (m.role && m.content) messages.push({ role: m.role, content: m.content });
+          });
+        }
+        messages.push({ role: "user", content: text });
+
+        const body = JSON.stringify({ messages: messages });
+
+        const resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body,
+        });
+
+        const data = await resp.json();
+
+        typingWrap.remove();
+
+        if (!resp.ok || data.error) {
+          throw new Error(data.error || "Error en la respuesta");
+        }
+
+        const reply = data.reply || "Sin respuesta";
+        const imageUrl = data.imageUrl || null;
+
+        addMessageToDOM("assistant", reply, imageUrl, null, true);
+
+        if (currentChatId) {
+          VerdixAuth.addMessageToChat(currentChatId, { role: "assistant", content: reply, imageUrl: imageUrl });
+        }
+
+      } catch (err) {
+        typingWrap.remove();
+        addMessageToDOM("system", "❌ Error: " + (err.message || "Error desconocido"), null, null, true);
+        showToast(err.message || "Error al conectar con la IA", "error");
+      } finally {
+        isSending = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = "➤";
+        chatText.focus();
+      }
+    }
+
+    // Utilidades
+    function escapeHtml(txt) {
+      const d = document.createElement("div");
+      d.textContent = txt;
+      return d.innerHTML;
+    }
+
+    function showToast(msg, type = "info") {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = type === "error" ? "test-result error" : "test-result success";
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 3000);
+    }
+
+    function toggleSidebar(force) {
+      const isOpen = chatSidebar.classList.contains("open");
+      const shouldOpen = force !== undefined ? force : !isOpen;
+      if (shouldOpen) {
+        chatSidebar.classList.add("open");
+        mobileOverlay.classList.add("show");
+      } else {
+        chatSidebar.classList.remove("open");
+        mobileOverlay.classList.remove("show");
+      }
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      fileInput.value = "";
+      fileAttach.style.display = "none";
+    }
+
+    // Exponer globalmente
+    window.createNewChat = createNewChat;
+    window.loadChat = loadChat;
+    window.toggleSidebar = toggleSidebar;
+    window.VerdixAuth = VerdixAuth;
+    window.toggleAuth = toggleAuth;
+
+    // Iniciar
+    init();
+  </script>
 </body>
 </html>

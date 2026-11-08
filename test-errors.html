@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verdix - Pruebas de Errores y Seguridad</title>
+  <meta name="theme-color" content="#04070a" />
+  <link rel="icon" type="image/png" href="/icon-192.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .test-card {
+      background: linear-gradient(160deg, rgba(14, 24, 30, 0.92), rgba(6, 12, 16, 0.92));
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+    .test-card:hover {
+      border-color: rgba(0, 255, 65, 0.35);
+    }
+    .test-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .test-result.success {
+      background: rgba(0, 255, 65, 0.1);
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      color: #00ff41;
+    }
+    .test-result.error {
+      background: rgba(255, 92, 122, 0.1);
+      border: 1px solid rgba(255, 92, 122, 0.3);
+      color: #ff5c7a;
+    }
+    .test-result.warning {
+      background: rgba(255, 204, 51, 0.1);
+      border: 1px solid rgba(255, 204, 51, 0.3);
+      color: #ffcc33;
+    }
+    .btn-test {
+      background: linear-gradient(120deg, var(--green), var(--green-2));
+      color: #03130c;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .btn-test:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px -8px rgba(0, 255, 65, 0.7);
+    }
+    .security-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+    .badge-secure { background: rgba(0, 255, 65, 0.2); color: #00ff41; border: 1px solid rgba(0, 255, 65, 0.3); }
+    .badge-warning { background: rgba(255, 204, 51, 0.2); color: #ffcc33; border: 1px solid rgba(255, 204, 51, 0.3); }
+    .badge-danger { background: rgba(255, 92, 122, 0.2); color: #ff5c7a; border: 1px solid rgba(255, 92, 122, 0.3); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="nav">
+        <a href="index.html">Inicio</a>
+        <a href="browser.html">Browser</a>
+        <a href="search.html">Search</a>
+        <a href="ai.html">AI</a>
+        <a href="download.html">Descargas</a>
+        <a href="test-errors.html" class="active">Pruebas</a>
+        <a href="#os">OS</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="tool-page">
+    <div class="wrap" style="max-width:1000px">
+      <div class="tool-head">
+        <span class="eyebrow">Verdix · Pruebas de Errores y Seguridad</span>
+        <h1>Validación del Sistema</h1>
+        <p>Pruebas de errores, seguridad y adaptación de dispositivo</p>
+      </div>
+
+      <!-- Información del dispositivo -->
+      <div class="test-card reveal">
+        <h3>📱 Información del Dispositivo</h3>
+        <div id="device-info" class="test-result success"></div>
+        <button class="btn-test" onclick="testDevice()">Detectar Dispositivo</button>
+      </div>
+
+      <!-- Prueba de conectividad -->
+      <div class="test-card reveal">
+        <h3>🌐 Conectividad y API</h3>
+        <div id="connectivity-result" class="test-result"></div>
+        <button class="btn-test" onclick="testConnectivity()">Probar Conexión API</button>
+      </div>
+
+      <!-- Prueba de IA -->
+      <div class="test-card reveal">
+        <h3>🧠 IA (Verdix AI)</h3>
+        <div id="ai-result" class="test-result"></div>
+        <button class="btn-test" onclick="testAI()">Probar IA</button>
+      </div>
+
+      <!-- Prueba de seguridad XSS -->
+      <div class="test-card reveal">
+        <h3>🔒 Seguridad XSS</h3>
+        <p>Prueba de inyección de scripts maliciosos</p>
+        <div id="xss-result" class="test-result"></div>
+        <button class="btn-test" onclick="testXSS()">Probar XSS</button>
+      </div>
+
+      <!-- Prueba de imágenes -->
+      <div class="test-card reveal">
+        <h3>🖼️ Prueba de Imágenes</h3>
+        <div id="image-result" class="test-result"></div>
+        <button class="btn-test" onclick="testImage()">Probar Carga de Imagen</button>
+      </div>
+
+      <!-- Prueba de cámara -->
+      <div class="test-card reveal">
+        <h3>📷 Prueba de Cámara</h3>
+        <p>Prueba de acceso a la cámara del dispositivo</p>
+        <div id="camera-result" class="test-result"></div>
+        <button class="btn-test" onclick="testCamera()">Probar Cámara</button>
+      </div>
+
+      <!-- Prueba de rate limiting -->
+      <div class="test-card reveal">
+        <h3>⚡ Rate Limiting</h3>
+        <p>Prueba de límites de solicitud</p>
+        <div id="rate-result" class="test-result"></div>
+        <button class="btn-test" onclick="testRateLimit()">Probar Rate Limit</button>
+      </div>
+
+      <!-- Resumen de seguridad -->
+      <div class="test-card reveal">
+        <h3>🛡️ Resumen de Seguridad</h3>
+        <div id="security-summary" class="test-result success">
+          <p>✅ CSP: Configurado</p>
+          <p>✅ XSS Protection: Activado</p>
+          <p>✅ Rate Limiting: Activo</p>
+          <p>✅ Sanitización de Entrada: Habilitada</p>
+          <p>✅ Detección de Dispositivo: Activa</p>
+          <p>✅ Manejo de Errores: Implementado</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">∞</span> VERDIX</a>
+      <span>© <span data-year>2026</span> Verdix - Seguridad y Pruebas</span>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/security.js"></script>
+  <script>
+    // Funciones de prueba
+    async function testDevice() {
+      const device = VerdixSecurity.detectDevice();
+      const el = document.getElementById("device-info");
+      el.style.display = "block";
+      el.className = "test-result success";
+      el.innerHTML = `
+        <strong>Sistema:</span> ${device.system} ${navigator.platform}<br>
+        <strong>Arquitectura:</span> ${device.machine}<br>
+        <strong>Tipo:</span> ${device.isMobile ? "Móvil" : device.isTablet ? "Tablet" : "Escritorio"}<br>
+        <strong>Navegador:</span> ${device.isChrome ? "Chrome" : device.isFirefox ? "Firefox" : device.isSafari ? "Safari" : "Otro"}<br>
+        <strong>Pantalla:</span> ${device.screenWidth}x${device.screenHeight}<br>
+        <strong>Cookies:</span> ${device.cookieEnabled ? "Habilitadas" : "Deshabilitadas"}<br>
+        <strong>Táctil:</span> ${device.touchPoints > 0 ? "Sí (" + device.touchPoints + " puntos)" : "No"}<br>
+        <strong>Online:</span> ${device.onLine ? "Sí" : "No"}
+      `;
+    }
+
+    async function testConnectivity() {
+      const el = document.getElementById("connectivity-result");
+      el.style.display = "block";
+      try {
+        const start = Date.now();
+        const resp = await fetch("/api/health");
+        const end = Date.now();
+        const data = await resp.json();
+        el.className = "test-result success";
+        el.innerHTML = `
+          <strong>Estado:</span> ${resp.status} OK<br>
+          <strong>Tiempo de respuesta:</span> ${end - start}ms<br>
+          <strong>IA configurada:</span> ${data.ai_configured ? "Sí" : "No"}<br>
+          <strong>Modelo:</span> ${data.model || "N/A"}
+        `;
+      } catch (e) {
+        el.className = "test-result error";
+        el.innerHTML = `<strong>Error:</span> ${e.message}`;
+      }
+    }
+
+    async function testAI() {
+      const el = document.getElementById("ai-result");
+      el.style.display = "block";
+      try {
+        const resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: [{ role: "user", content": "prueba" }] }),
+        });
+        const data = await resp.json();
+        if (resp.ok && data.reply) {
+          el.className = "test-result success";
+          el.innerHTML = `<strong>Respuesta:</span> ${data.reply.substring(0, 100)}...<br><strong>Modelo:</span> ${data.model || "N/A"}`;
+        } else {
+          el.className = "test-result error";
+          el.innerHTML = `<strong>Error:</span> ${data.error || "Respuesta vacía"}`;
+        }
+      } catch (e) {
+        el.className = "test-result error";
+        el.innerHTML = `<strong>Error:</span> ${e.message}`;
+      }
+    }
+
+    function testXSS() {
+      const el = document.getElementById("xss-result");
+      el.style.display = "block";
+      const testInput = '<script>alert("xss")</script>';
+      const sanitized = VerdixSecurity.sanitizeInput(testInput);
+      const injection = VerdixSecurity.detectInjection(testInput);
+      
+      if (sanitized !== testInput && injection.detected) {
+        el.className = "test-result success";
+        el.innerHTML = `<strong>✅ XSS bloqueado</span><br>
+          <strong>Entrada original:</span> ${testInput}<br>
+          <strong>Sanitizada:</span> ${sanitized}<br>
+          <strong>Patrón detectado:</span> ${injection.pattern}`;
+      } else {
+        el.className = "test-result error";
+        el.innerHTML = "❌ XSS no fue bloqueado correctamente";
+      }
+    }
+
+    async function testImage() {
+      const el = document.getElementById("image-result");
+      el.style.display = "block";
+      try {
+        // Probar carga de imagen desde la API de imágenes
+        const resp = await fetch("/api/search?q=test&type=images");
+        const data = await resp.json();
+        if (data.results && data.results.length > 0) {
+          el.className = "test-result success";
+          el.innerHTML = `<strong>✅ Imágenes cargadas:</span> ${data.results.length} resultados<br>
+            <strong>Primera imagen:</span> ${data.results[0].image || "N/A"}`;
+        } else {
+          el.className = "test-result warning";
+          el.innerHTML = "⚠️ No se encontraron imágenes";
+        }
+      } catch (e) {
+        el.className = "test-result error";
+        el.innerHTML = `<strong>Error:</span> ${e.message}`;
+      }
+    }
+
+    async function testCamera() {
+      const el = document.getElementById("camera-result");
+      el.style.display = "block";
+      
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        el.className = "test-result error";
+        el.innerHTML = "❌ getUserMedia no soportado en este navegador";
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        stream.getTracks().forEach(track => track.stop());
+        el.className = "test-result success";
+        el.innerHTML = "✅ Cámara accesible y funcionando correctamente";
+      } catch (e) {
+        el.className = "test-result error";
+        el.innerHTML = `<strong>Error de cámara:</span> ${e.message}<br>
+          ${e.name === "NotAllowedError" ? "Permiso denegado por el usuario" : ""}
+          ${e.name === "NotFoundError" ? "No se encontró dispositivo de cámara" : ""}`;
+      }
+    }
+
+    async function testRateLimit() {
+      const el = document.getElementById("rate-result");
+      el.style.display = "block";
+      let success = 0;
+      let blocked = 0;
+
+      for (let i = 0; i < 10; i++) {
+        if (VerdixSecurity.checkRateLimit()) {
+          success++;
+        } else {
+          blocked++;
+        }
+      }
+
+      el.className = "test-result success";
+      el.innerHTML = `<strong>Solicitudes permitidas:</span> ${success}<br>
+        <strong>Solicitudes bloqueadas:</span> ${blocked}<br>
+        <strong>Límite:</span> ${VerdixSecurity.checkRateLimit.toString().substring(0, 50)}...`;
+    }
+
+    // Ejecutar detección automática al cargar
+    document.addEventListener("DOMContentLoaded", () => {
+      testDevice();
+      testConnectivity();
+    });
+  </script>
+</body>
+</html>

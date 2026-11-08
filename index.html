@@ -366,5 +366,37 @@
   </footer>
 
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/security.js"></script>
+  <script src="assets/js/device-adapter.js"></script>
+  <script src="assets/js/security-audit.js"></script>
+  <script>
+    // Inicializar detección de dispositivo y seguridad
+    document.addEventListener("DOMContentLoaded", () => {
+      const sec = VerdixSecurity.init();
+
+      // Mostrar información del dispositivo en consola para debugging
+      if (window.location.search.includes("debug=true")) {
+        console.table(sec.device);
+      }
+
+      // Adaptar UI según dispositivo
+      const body = document.body;
+      if (sec.device.isMobile) {
+        body.classList.add("device-mobile");
+      } else if (sec.device.isTablet) {
+        body.classList.add("device-tablet");
+      } else {
+        body.classList.add("device-desktop");
+      }
+
+      // Ajustar elementos según navegador
+      if (sec.device.isSafari) {
+        body.classList.add("browser-safari");
+      }
+      if (sec.device.isFirefox) {
+        body.classList.add("browser-firefox");
+      }
+    });
+  </script>
 </body>
 </html>
