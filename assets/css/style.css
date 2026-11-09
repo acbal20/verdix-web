@@ -5,7 +5,7 @@
   --bg: #030609;
   --bg-soft: #0a0f14;
   --panel: rgba(12, 20, 26, 0.85);
-  --panel-border: rgba(0, 255, 65, 0.18);
+  --panel-border: rgba(138, 43, 226, 0.18);
   --green: #00ff41;
   --green-2: #00cc33;
   --green-glow: rgba(0, 255, 65, 0.4);
@@ -19,6 +19,12 @@
   --glow: 0 0 40px rgba(0, 255, 65, 0.25);
   --font: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --transition: 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --neon-purple: #7b2cff;
+  --neon-purple-glow: rgba(138, 43, 226, 0.35);
+  --neon-blue: #00a8ff;
+  --neon-blue-glow: rgba(0, 168, 255, 0.35);
+  --silver: #c9d1d9;
+  --silver-glow: rgba(201, 209, 217, 0.2);
 }
 
 * {
