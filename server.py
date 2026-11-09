@@ -355,10 +355,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def end_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        # Headers de seguridad para todas las respuestas
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "same-origin")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://openrouter.ai https://es.wikipedia.org "
+            "https://html.duckduckgo.com https://api.openverse.org "
+            "https://www.youtube.com https://news.google.com; "
+            "font-src 'self' https://fonts.gstatic.com;",
+        )
+        # CORS restrictivo solo para rutas de la API
+        if self.path.startswith("/api/"):
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         super().end_headers()
+
+    def list_directory(self, path):
+        # Desactivar listado de directorios: devolver 403 Forbidden
+        self.send_response(403)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(b"Listado de directorios desactivado por seguridad.\n")
+        return None
 
 
 class Server(socketserver.ThreadingMixIn, http.server.HTTPServer):
