@@ -1,0 +1,178 @@
+/* ============================================================
+   VERDIX - Optimización Móvil y Reducción de Animaciones
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /* Reducir animaciones pesadas en móvil */
+  .orb-wrap {
+    display: none !important;
+  }
+  
+  .ring.r1,
+  .ring.r2 {
+    animation: none !important;
+    border: none !important;
+  }
+  
+  .btn-primary,
+  .btn-ghost,
+  .btn {
+    animation: none !important;
+    box-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  .card:hover {
+    transform: none !important;
+    border-color: var(--panel-border) !important;
+  }
+
+  .admin-card:hover {
+    transform: none !important;
+    border-color: var(--panel-border) !important;
+  }
+
+  .card::before {
+    opacity: 0 !important;
+  }
+
+  /* Desactivar animaciones de elementos */
+  .reveal.in {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* Desactivar animaciones de partículas en móvil */
+  .particle,
+  .particle-glow {
+    display: none !important;
+  }
+
+  /* Reducir sombras pesadas */
+  .card,
+  .admin-card,
+  .dropdown-card,
+  .feature-card {
+    box-shadow: none !important;
+    box-shadow: 0 2px 4px rgba(0, 255, 65, 0.1) !important;
+  }
+
+  /* Optimizar imágenes para móvil */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Reducir textos en móvil */
+  .admin-title {
+    font-size: 1.2rem !important;
+  }
+
+  .admin-subtitle {
+    font-size: 1rem !important;
+  }
+
+  /* Reducir padding en móvil para más espacio */
+  .admin-container {
+    padding: 10px !important;
+  }
+
+  .panel {
+    padding: 15px !important;
+  }
+
+  .card {
+    padding: 15px !important;
+  }
+
+  /* Reducir tamaño de fuentes en móvil */
+  .feature-title,
+  .testimonial-author {
+    font-size: 1rem !important;
+  }
+
+  .feature-text,
+  .testimonial-text,
+  .product-description {
+    font-size: 0.85rem !important;
+  }
+
+  /* Reducir espacio entre elementos en móvil */
+  .feature-card,
+  .product-card,
+  .testimonial-card {
+    margin-bottom: 20px !important;
+  }
+
+  /* Reducir tamaño de iconos en móvil */
+  .feature-icon,
+  .product-icon,
+  .testimonial-image {
+    font-size: 2rem !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* Reducir tamaño de botones en móvil */
+  .btn-primary,
+  .btn-ghost,
+  .btn {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Reducir altura de inputs en móvil */
+  .search-input,
+  .price-input,
+  .text-input,
+  .number-input,
+  .textarea,
+  .select-input {
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Reducir ancho de botones en móvil */
+  .btn-primary,
+  .btn-ghost,
+  .btn {
+    width: auto !important;
+    max-width: 100% !important;
+    padding: 10px 20px !important;
+  }
+
+  /* Reducir márgenes en móvil */
+  .hero-section {
+    padding: 40px 20px !important;
+  }
+
+  .feature-card,
+  .product-card,
+  .testimonial-card {
+    margin-bottom: 20px !important;
+  }
+
+  /* Reducir tamaño de títulos en móvil */
+  .section-title {
+    font-size: 1.8rem !important;
+  }
+
+  .section-subtitle {
+    font-size: 1rem !important;
+  }
+
+  /* Reducir padding de secciones en móvil */
+  .hero-section,
+  .features-section,
+  .products-section,
+  .testimonials-section,
+  .contact-section {
+    padding: 40px 20px !important;
+  }
