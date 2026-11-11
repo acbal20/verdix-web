@@ -8,9 +8,18 @@ import urllib.error
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
+import base64
+import time
+import threading
+from collections import defaultdict
+from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PORT = int(os.environ.get("VERDIX_PORT", "8099"))
+
+# ---------------------------------------------------------------------------
+# Carga de variables de entorno desde .env
+# ---------------------------------------------------------------------------
 
 
 def _load_env():
@@ -29,11 +38,111 @@ def _load_env():
 _load_env()
 
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
-OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "deepseek/deepseek-v4.1-flash-1017").strip()
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "deepseek/deepseek-chat").strip()
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
 )
+
+# ---------------------------------------------------------------------------
+# Límites máximos (configurables vía variables de entorno)
+# ---------------------------------------------------------------------------
+LIMITE_MENSAJES = int(os.environ.get("LIMITE_MENSAJES", "5000"))          # por usuario
+LIMITE_VISION = int(os.environ.get("LIMITE_VISION", "500"))               # por usuario
+LIMITE_IMAGENES_DIA = int(os.environ.get("LIMITE_IMAGENES_DIA", "100"))   # por usuario/día
+RATE_LIMIT_SEGUNDOS = float(os.environ.get("RATE_LIMIT_SEGUNDOS", "2.0")) # 1 mensaje cada N segundos
+
+ARCHIVO_USO = os.path.join(BASE_DIR, "usage_stats.json")
+_uso_lock = threading.Lock()
+
+
+def _cargar_uso():
+    """Carga las estadísticas de uso desde disco."""
+    try:
+        with open(ARCHIVO_USO, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return {}
+
+
+def _guardar_uso(datos):
+    """Guarda las estadísticas de uso en disco."""
+    tmp = ARCHIVO_USO + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(datos, fh, ensure_ascii=False, indent=2)
+    os.replace(tmp, ARCHIVO_USO)
+
+
+def _ahora_iso():
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def _hoy_iso():
+    return time.strftime("%Y-%m-%d", time.gmtime())
+
+
+def _identificar_usuario(handler):
+    """Identifica al usuario por header X-User-ID o por IP."""
+    uid = handler.headers.get("X-User-ID")
+    if uid:
+        return "user:" + uid.strip()
+    return "ip:" + handler.client_address[0]
+
+
+def _verificar_limite(uso, usuario, tipo):
+    """Verifica si el usuario ha excedido el límite para el tipo dado."""
+    hoy = _hoy_iso()
+    datos_usuario = uso.get(usuario, {})
+    if tipo == "chat":
+        contador = datos_usuario.get("chat_count", 0)
+        return contador < LIMITE_MENSAJES, contador, LIMITE_MENSAJES
+    if tipo == "vision":
+        contador = datos_usuario.get("vision_count", 0)
+        return contador < LIMITE_VISION, contador, LIMITE_VISION
+    if tipo == "image":
+        contador_dia = datos_usuario.get("image_count", {}).get(hoy, 0)
+        return contador_dia < LIMITE_IMAGENES_DIA, contador_dia, LIMITE_IMAGENES_DIA
+    return True, 0, 0
+
+
+def _incrementar_contador(uso, usuario, tipo):
+    """Incrementa el contador de uso del usuario."""
+    hoy = _hoy_iso()
+    if usuario not in uso:
+        uso[usuario] = {}
+    datos_usuario = uso[usuario]
+    if tipo == "chat":
+        datos_usuario["chat_count"] = datos_usuario.get("chat_count", 0) + 1
+        datos_usuario["chat_last"] = _ahora_iso()
+    elif tipo == "vision":
+        datos_usuario["vision_count"] = datos_usuario.get("vision_count", 0) + 1
+        datos_usuario["vision_last"] = _ahora_iso()
+    elif tipo == "image":
+        imagenes = datos_usuario.setdefault("image_count", {})
+        imagenes[hoy] = imagenes.get(hoy, 0) + 1
+        datos_usuario["image_last"] = _ahora_iso()
+    _guardar_uso(uso)
+
+
+# Rate limiting en memoria (usuario -> último timestamp de petición)
+_rate_lock = threading.Lock()
+_ultima_peticion = {}
+
+
+def _verificar_rate_limit(usuario):
+    """Devuelve True si el usuario puede hacer una petición ahora."""
+    with _rate_lock:
+        ahora = time.time()
+        ultimo = _ultima_peticion.get(usuario, 0)
+        if ahora - ultimo < RATE_LIMIT_SEGUNDOS:
+            return False, RATE_LIMIT_SEGUNDOS - (ahora - ultimo)
+        _ultima_peticion[usuario] = ahora
+        return True, 0.0
+
+
+# ---------------------------------------------------------------------------
+# Utilidades de red
+# ---------------------------------------------------------------------------
 
 
 def fetch(url, timeout=12, headers=None, accept_language="es-ES,es;q=0.9,en;q=0.8"):
@@ -53,7 +162,65 @@ def clean_text(raw):
     return re.sub(r"\s+", " ", html.unescape(text)).strip()
 
 
-# ----------------------------- Web sources -----------------------------
+def openrouter_chat(messages, model=None, temperature=0.7, max_tokens=4096):
+    """Llama a OpenRouter chat/completions y devuelve el texto de respuesta."""
+    if not OPENROUTER_KEY:
+        raise RuntimeError("OPENROUTER_API_KEY no configurada")
+    modelo = model or OPENROUTER_MODEL
+    payload = {
+        "model": modelo,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    req = urllib.request.Request(
+        "https://openrouter.ai/api/v1/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENROUTER_KEY}",
+            "HTTP-Referer": f"http://localhost:{PORT}",
+            "X-Title": "Verdix AI",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=90) as response:
+        data = json.loads(response.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
+
+
+def openrouter_image_generate(prompt, model="black-forest-labs/flux-schnell"):
+    """Genera una imagen vía OpenRouter y devuelve la URL de la imagen."""
+    if not OPENROUTER_KEY:
+        raise RuntimeError("OPENROUTER_API_KEY no configurada")
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "response_format": "url",
+        "size": "1024x1024",
+    }
+    req = urllib.request.Request(
+        "https://openrouter.ai/api/v1/images/generations",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENROUTER_KEY}",
+            "HTTP-Referer": f"http://localhost:{PORT}",
+            "X-Title": "Verdix AI",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=120) as response:
+        data = json.loads(response.read().decode("utf-8"))
+    # OpenRouter devuelve data[0].url o similar
+    try:
+        return data["data"][0]["url"]
+    except (KeyError, IndexError):
+        # Algunos proveedores devuelven directamente la URL
+        return data.get("url") or str(data)
+
+
+# ---------------------------------------------------------------------------
+# Web sources (búsqueda)
+# ---------------------------------------------------------------------------
 
 
 def search_wikipedia(query, limit=6):
@@ -122,7 +289,9 @@ def merge_results(*groups, limit=14):
     return merged
 
 
-# ----------------------------- Images -----------------------------
+# ---------------------------------------------------------------------------
+# Images (búsqueda)
+# ---------------------------------------------------------------------------
 
 
 def search_images(query, limit=20):
@@ -147,7 +316,9 @@ def search_images(query, limit=20):
     return results
 
 
-# ----------------------------- Videos -----------------------------
+# ---------------------------------------------------------------------------
+# Videos
+# ---------------------------------------------------------------------------
 
 
 def search_videos(query, limit=18):
@@ -196,7 +367,9 @@ def search_videos(query, limit=18):
     return videos[:limit]
 
 
-# ----------------------------- News -----------------------------
+# ---------------------------------------------------------------------------
+# News
+# ---------------------------------------------------------------------------
 
 
 def search_news(query, limit=20):
@@ -229,7 +402,9 @@ def search_news(query, limit=20):
     return results
 
 
-# ----------------------------- Handler -----------------------------
+# ---------------------------------------------------------------------------
+# Handler
+# ---------------------------------------------------------------------------
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -246,61 +421,292 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
+        # CORS para preflight
+        if self.path.startswith("/api/"):
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-ID")
         self.end_headers()
 
     def do_POST(self):
-        if self.path != "/api/chat":
-            self._json(404, {"error": "Ruta no encontrada"})
-            return
+        parsed = urllib.parse.urlparse(self.path)
+        ruta = parsed.path
 
-        length = int(self.headers.get("Content-Length", 0))
-        try:
-            data = json.loads(self.rfile.read(length) or b"{}")
-        except json.JSONDecodeError:
-            self._json(400, {"error": "JSON inválido"})
-            return
+        # ---------------------------------------------------------------
+        # /api/chat — Texto con DeepSeek (límite 5000 mensajes)
+        # ---------------------------------------------------------------
+        if ruta == "/api/chat":
+            usuario = _identificar_usuario(self)
 
-        if not OPENROUTER_KEY:
-            self._json(
-                503,
-                {
-                    "error": "Falta OPENROUTER_API_KEY. Configurala en el archivo .env "
-                    "del proyecto para activar Verdix AI."
+            # Rate limiting
+            puede, espera = _verificar_rate_limit(usuario)
+            if not puede:
+                self._json(
+                    429,
+                    {
+                        "error": "Rate limit excedido",
+                        "reintentar_en_segundos": round(espera, 1),
+                        "mensaje": f"Espera {espera:.1f}s antes de enviar otro mensaje.",
+                    },
+                )
+                return
+
+            # Límite de mensajes
+            with _uso_lock:
+                uso = _cargar_uso()
+                ok, contador, limite = _verificar_limite(uso, usuario, "chat")
+                if not ok:
+                    self._json(
+                        429,
+                        {
+                            "error": "Límite de mensajes alcanzado",
+                            "contador": contador,
+                            "limite": limite,
+                            "tipo": "chat",
+                        },
+                    )
+                    return
+
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except json.JSONDecodeError:
+                self._json(400, {"error": "JSON inválido"})
+                return
+
+            if not OPENROUTER_KEY:
+                self._json(
+                    503,
+                    {
+                        "error": "Falta OPENROUTER_API_KEY. Configurala en el archivo .env "
+                        "del proyecto para activar Verdix AI."
+                    },
+                )
+                return
+
+            model = (data.get("model") or OPENROUTER_MODEL).strip()
+            messages = data.get("messages", [])
+            temperature = data.get("temperature", 0.7)
+            max_tokens = data.get("max_tokens", 4096)
+
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+            }
+
+            request = urllib.request.Request(
+                "https://openrouter.ai/api/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {OPENROUTER_KEY}",
+                    "HTTP-Referer": f"http://localhost:{PORT}",
+                    "X-Title": "Verdix AI",
                 },
             )
+
+            try:
+                with urllib.request.urlopen(request, timeout=90) as response:
+                    respuesta = json.loads(response.read().decode("utf-8"))
+                # Incrementar contador tras éxito
+                with _uso_lock:
+                    uso = _cargar_uso()
+                    _incrementar_contador(uso, usuario, "chat")
+                self._json(200, respuesta)
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", "replace")
+                try:
+                    detail = json.loads(detail)
+                except json.JSONDecodeError:
+                    pass
+                self._json(exc.code, {"error": detail})
+            except Exception as exc:  # noqa: BLE001
+                self._json(500, {"error": str(exc)})
             return
 
-        model = (data.get("model") or OPENROUTER_MODEL).strip()
-        payload = {
-            "model": model,
-            "messages": data.get("messages", []),
-        }
-        if data.get("temperature") is not None:
-            payload["temperature"] = data["temperature"]
+        # ---------------------------------------------------------------
+        # /api/vision — Análisis de imagen con Gemini 2.5 Pro (límite 500)
+        # ---------------------------------------------------------------
+        if ruta == "/api/vision":
+            usuario = _identificar_usuario(self)
 
-        request = urllib.request.Request(
-            "https://openrouter.ai/api/v1/chat/completions",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {OPENROUTER_KEY}",
-                "HTTP-Referer": "http://localhost:%d" % PORT,
-                "X-Title": "Verdix AI",
-            },
-        )
+            puede, espera = _verificar_rate_limit(usuario)
+            if not puede:
+                self._json(
+                    429,
+                    {
+                        "error": "Rate limit excedido",
+                        "reintentar_en_segundos": round(espera, 1),
+                    },
+                )
+                return
 
-        try:
-            with urllib.request.urlopen(request, timeout=60) as response:
-                self._json(200, json.loads(response.read().decode("utf-8")))
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", "replace")
+            with _uso_lock:
+                uso = _cargar_uso()
+                ok, contador, limite = _verificar_limite(uso, usuario, "vision")
+                if not ok:
+                    self._json(
+                        429,
+                        {
+                            "error": "Límite de análisis de imagen alcanzado",
+                            "contador": contador,
+                            "limite": limite,
+                            "tipo": "vision",
+                        },
+                    )
+                    return
+
+            length = int(self.headers.get("Content-Length", 0))
             try:
-                detail = json.loads(detail)
+                data = json.loads(self.rfile.read(length) or b"{}")
             except json.JSONDecodeError:
-                pass
-            self._json(exc.code, {"error": detail})
-        except Exception as exc:  # noqa: BLE001
-            self._json(500, {"error": str(exc)})
+                self._json(400, {"error": "JSON inválido"})
+                return
+
+            if not OPENROUTER_KEY:
+                self._json(503, {"error": "Falta OPENROUTER_API_KEY"})
+                return
+
+            imagen_b64 = data.get("imagen", "")  # base64 o data URL
+            prompt = data.get("prompt", "¿Qué se ve en esta imagen?")
+            model = data.get("model", "google/gemini-2.5-pro").strip()
+
+            # Si viene como data URL, extraer solo la parte base64
+            if imagen_b64.startswith("data:"):
+                imagen_b64 = imagen_b64.split(",", 1)[1] if "," in imagen_b64 else ""
+
+            messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{imagen_b64}"},
+                        },
+                    ],
+                }
+            ]
+
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 2048,
+            }
+
+            request = urllib.request.Request(
+                "https://openrouter.ai/api/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {OPENROUTER_KEY}",
+                    "HTTP-Referer": f"http://localhost:{PORT}",
+                    "X-Title": "Verdix AI",
+                },
+            )
+
+            try:
+                with urllib.request.urlopen(request, timeout=90) as response:
+                    respuesta = json.loads(response.read().decode("utf-8"))
+                with _uso_lock:
+                    uso = _cargar_uso()
+                    _incrementar_contador(uso, usuario, "vision")
+                self._json(200, respuesta)
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", "replace")
+                try:
+                    detail = json.loads(detail)
+                except json.JSONDecodeError:
+                    pass
+                self._json(exc.code, {"error": detail})
+            except Exception as exc:  # noqa: BLE001
+                self._json(500, {"error": str(exc)})
+            return
+
+        # ---------------------------------------------------------------
+        # /api/image — Generación de imagen con Flux Schnell (límite 100/día)
+        # ---------------------------------------------------------------
+        if ruta == "/api/image":
+            usuario = _identificar_usuario(self)
+
+            puede, espera = _verificar_rate_limit(usuario)
+            if not puede:
+                self._json(
+                    429,
+                    {
+                        "error": "Rate limit excedido",
+                        "reintentar_en_segundos": round(espera, 1),
+                    },
+                )
+                return
+
+            with _uso_lock:
+                uso = _cargar_uso()
+                ok, contador, limite = _verificar_limite(uso, usuario, "image")
+                if not ok:
+                    self._json(
+                        429,
+                        {
+                            "error": "Límite diario de generación de imagen alcanzado",
+                            "contador": contador,
+                            "limite": limite,
+                            "tipo": "image",
+                            "fecha": _hoy_iso(),
+                        },
+                    )
+                    return
+
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except json.JSONDecodeError:
+                self._json(400, {"error": "JSON inválido"})
+                return
+
+            if not OPENROUTER_KEY:
+                self._json(503, {"error": "Falta OPENROUTER_API_KEY"})
+                return
+
+            prompt = data.get("prompt", "")
+            if not prompt:
+                self._json(400, {"error": "Falta el parámetro prompt"})
+                return
+
+            model = data.get("model", "black-forest-labs/flux-schnell").strip()
+
+            try:
+                url_imagen = openrouter_image_generate(prompt, model=model)
+                with _uso_lock:
+                    uso = _cargar_uso()
+                    _incrementar_contador(uso, usuario, "image")
+                self._json(
+                    200,
+                    {
+                        "ok": True,
+                        "prompt": prompt,
+                        "model": model,
+                        "url": url_imagen,
+                    },
+                )
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", "replace")
+                try:
+                    detail = json.loads(detail)
+                except json.JSONDecodeError:
+                    pass
+                self._json(exc.code, {"error": detail})
+            except Exception as exc:  # noqa: BLE001
+                self._json(500, {"error": str(exc)})
+            return
+
+        # ---------------------------------------------------------------
+        # Cualquier otra POST -> 404
+        # ---------------------------------------------------------------
+        self._json(404, {"error": "Ruta no encontrada"})
+        return
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -312,6 +718,32 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     "status": "ok",
                     "ai_configured": bool(OPENROUTER_KEY),
                     "model": OPENROUTER_MODEL,
+                    "limites": {
+                        "chat": LIMITE_MENSAJES,
+                        "vision": LIMITE_VISION,
+                        "imagenes_por_dia": LIMITE_IMAGENES_DIA,
+                        "rate_limit_segundos": RATE_LIMIT_SEGUNDOS,
+                    },
+                },
+            )
+            return
+
+        if parsed.path == "/api/stats":
+            usuario = _identificar_usuario(self)
+            with _uso_lock:
+                uso = _cargar_uso()
+                datos_usuario = uso.get(usuario, {})
+            hoy = _hoy_iso()
+            self._json(
+                200,
+                {
+                    "usuario": usuario,
+                    "chat_count": datos_usuario.get("chat_count", 0),
+                    "chat_limite": LIMITE_MENSAJES,
+                    "vision_count": datos_usuario.get("vision_count", 0),
+                    "vision_limite": LIMITE_VISION,
+                    "image_count_hoy": datos_usuario.get("image_count", {}).get(hoy, 0),
+                    "image_limite_dia": LIMITE_IMAGENES_DIA,
                 },
             )
             return
@@ -367,14 +799,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             "img-src 'self' data: https:; "
             "connect-src 'self' https://openrouter.ai https://es.wikipedia.org "
             "https://html.duckduckgo.com https://api.openverse.org "
-            "https://www.youtube.com https://news.google.com; "
+            "https://www.youtube.com https://news.google.com "
+            "https://api.groq.com https://generativelanguage.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com;",
         )
         # CORS restrictivo solo para rutas de la API
         if self.path.startswith("/api/"):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-User-ID")
         super().end_headers()
 
     def list_directory(self, path):
@@ -394,6 +827,8 @@ if __name__ == "__main__":
     with Server(("", PORT), Handler) as httpd:
         print(f"✅ Verdix corriendo en http://localhost:{PORT}")
         print(f"   Buscador: /api/search | IA: {OPENROUTER_MODEL}")
+        print(f"   Límites: chat={LIMITE_MENSAJES}, vision={LIMITE_VISION}, imagenes/dia={LIMITE_IMAGENES_DIA}")
+        print(f"   Rate limit: 1 mensaje cada {RATE_LIMIT_SEGUNDOS}s")
         if not OPENROUTER_KEY:
             print("⚠️  OPENROUTER_API_KEY no configurada (Verdix AI desactivada).")
         httpd.serve_forever()
