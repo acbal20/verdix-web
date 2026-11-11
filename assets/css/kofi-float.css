@@ -1,0 +1,49 @@
+/* Botón flotante Ko-fi — VERDIX */
+.kofi-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #bf00ff, #00a8ff);
+  border: 3px solid #bf00ff;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(191, 0, 255, 0.4);
+  transition: all 0.3s ease;
+  animation: kofi-pulse 2s infinite;
+}
+
+.kofi-float:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(191, 0, 255, 0.7);
+  animation: none;
+}
+
+.kofi-float span {
+  display: block;
+}
+
+@keyframes kofi-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(191, 0, 255, 0.5); }
+  70% { box-shadow: 0 0 0 15px rgba(191, 0, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(191, 0, 255, 0); }
+}
+
+@media (max-width: 768px) {
+  .kofi-float {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 50px;
+    height: 50px;
+    font-size: 0.8rem;
+  }
+}

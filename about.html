@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acerca de VERDIX</title>
+<link rel="stylesheet" href="assets/css/mobile-optimization.css">
+<style>
+  :root {
+    --negro: #0a0a0a;
+    --negro-suave: #121212;
+    --morado-neon: #bf00ff;
+    --azul-electrico: #00a8ff;
+    --texto: #e0e0e0;
+    --texto-secundario: #a0a0a0;
+    --borde: #2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--negro); color: var(--texto); font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 2rem; }
+  header {
+    background: linear-gradient(135deg, var(--morado-neon), var(--azul-electrico));
+    padding: 2rem;
+    text-align: center;
+  }
+  header h1 { color: #fff; font-size: 2rem; letter-spacing: 2px; }
+  header p { color: rgba(255,255,255,0.9); margin-top: 0.5rem; font-size: 1.1rem; }
+  .seccion { margin-bottom: 3rem; padding: 1.5rem; background: var(--negro-suave); border: 1px solid var(--borde); border-radius: 0.8rem; }
+  .seccion h2 { color: var(--azul-electrico); margin-bottom: 1rem; font-size: 1.3rem; border-bottom: 2px solid var(--morado-neon); padding-bottom: 0.4rem; }
+  .seccion p { color: var(--texto-secundario); margin-bottom: 0.8rem; }
+  .seccion ul { color: var(--texto-secundario); margin-left: 1.5rem; }
+  .seccion ul li { margin-bottom: 0.4rem; }
+  .destacado { color: var(--morado-neon); font-weight: bold; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .wrap { padding: 1rem; } }
+  .chip { display: inline-block; background: #1a1a1a; border: 1px solid var(--borde); color: var(--azul-electrico); padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.8rem; margin: 0.2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>∞ Acerca de VERDIX</h1>
+  <p>Construyendo el futuro de los sistemas operativos, IAs y juegos</p>
+</header>
+
+<div class="wrap">
+  <div class="seccion">
+    <h2>¿Quién es NOX?</h2>
+    <p>NOX es el fundador y desarrollador principal de VERDIX. Un creador independiente apasionado por la tecnología, la programación y la construcción de ecosistemas digitales completos desde cero.</p>
+    <span class="chip">Fundador</span>
+    <span class="chip">Desarrollador</span>
+    <span class="chip">Creador de VERDIX OS</span>
+  </div>
+
+  <div class="seccion">
+    <h2>¿Qué es VERDIX?</h2>
+    <p>VERDIX es un ecosistema de software libre y abierto que incluye:</p>
+    <ul>
+      <li><span class="destacado">VERDIX OS</span> — Sistema operativo basado en Debian con entorno de escritorio XFCE, herramientas de desarrollo y aplicaciones integradas.</li>
+      <li><span class="destacado">Verdix IA</span> — Asistente inteligente con capacidades de chat, análisis de imágenes y generación de imágenes (DeepSeek y Gemini vía OpenRouter).</li>
+      <li><span class="destacado">Juegos Verdix</span> — Títulos como Ben 10 Omnitrix Battle, disponibles como APK para Android.</li>
+      <li><span class="destacado">Verdix Web</span> — Sitio web, buscador y herramientas en línea desplegadas en Vercel.</li>
+    </ul>
+  </div>
+
+  <div class="seccion">
+    <h2>Nuestra Misión</h2>
+    <p>Construir sistemas operativos, inteligencias artificiales y juegos que sean accesibles, gratuitos y construidos con transparencia. VERDIX no es solo software: es una visión de tecnología al servicio del usuario, sin barreras innecesarias.</p>
+  </div>
+
+  <div class="grid">
+    <div class="seccion">
+      <h2>Tecnologías utilizadas</h2>
+      <ul>
+        <li>Debian / Linux</li>
+        <li>XFCE4</li>
+        <li>Python, Bash, JavaScript</li>
+        <li>OpenRouter (DeepSeek, Gemini, Flux)</li>
+        <li>Vercel (hosting web)</li>
+        <li>GitHub (control de versiones)</li>
+      </ul>
+    </div>
+    <div class="seccion">
+      <h2>Estado del proyecto</h2>
+      <p>VERDIX está en <span class="destacado">construcción activa</span>. Cada versión trae mejoras en rendimiento, nuevas funcionalidades y mayor estabilidad.</p>
+      <p><span class="chip">Versión 1.0.0</span> <span class="chip">En desarrollo</span></p>
+    </div>
+  </div>
+
+  <div class="seccion">
+    <h2>Contacto</h2>
+    <p>Si tienes preguntas, sugerencias o quieres colaborar, puedes contactar al fundador a través de los canales oficiales del proyecto.</p>
+    <p><a href="mailto:zaye20122016@gmail.com" style="color: var(--azul-electrico);">zaye20122016@gmail.com</a></p>
+  </div>
+</div>
+
+<script src="assets/js/app.js"></script>
+<script src="assets/js/security.js"></script>
+<script src="assets/js/device-adapter.js"></script>
+<script src="assets/js/security-audit.js"></script>
+<footer style="margin-top:2rem;padding:1rem;text-align:center;border-top:1px solid #2a2a2a;">
+  <span style="color:#a0a0a0;font-size:0.9rem;">© 2026 VERDIX - Fundador: Yeremy Galeano (NOX). Todos los derechos reservados.</span>
+</footer>
+</body>
+</html>

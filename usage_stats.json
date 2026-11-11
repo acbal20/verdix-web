@@ -2,5 +2,9 @@
   "user:test_user": {
     "chat_count": 1,
     "chat_last": "2026-11-11T23:24:05Z"
+  },
+  "user:test_fase28": {
+    "chat_count": 1,
+    "chat_last": "2026-11-11T23:48:27Z"
   }
 }
