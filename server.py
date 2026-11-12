@@ -39,6 +39,9 @@ _load_env()
 
 OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY", "").strip()
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "deepseek/deepseek-chat").strip()
+GROQ_KEY = os.environ.get("GROQ_API_KEY", "").strip()
+MISTRAL_KEY = os.environ.get("MISTRAL_API_KEY", "").strip()
+HF_KEY = os.environ.get("HF_API_KEY", "").strip()
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
@@ -216,6 +219,119 @@ def openrouter_image_generate(prompt, model="black-forest-labs/flux-schnell"):
     except (KeyError, IndexError):
         # Algunos proveedores devuelven directamente la URL
         return data.get("url") or str(data)
+
+
+# ---------------------------------------------------------------------------
+# IA de respaldo: Groq (Llama 3.1 405B)
+# ---------------------------------------------------------------------------
+
+
+def groq_chat(messages, model="llama-3.1-405b-reasoning", temperature=0.7, max_tokens=4096):
+    """Llama a Groq chat/completions y devuelve el texto de respuesta."""
+    if not GROQ_KEY:
+        raise RuntimeError("GROQ_API_KEY no configurada")
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    req = urllib.request.Request(
+        "https://api.groq.com/openai/v1/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {GROQ_KEY}",
+            "HTTP-Referer": f"http://localhost:{PORT}",
+            "X-Title": "Verdix AI",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=90) as response:
+        data = json.loads(response.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
+
+
+# ---------------------------------------------------------------------------
+# IA de respaldo: Mistral (Codestral)
+# ---------------------------------------------------------------------------
+
+
+def mistral_chat(messages, model="codestral-latest", temperature=0.7, max_tokens=4096):
+    """Llama a Mistral chat/completions y devuelve el texto de respuesta."""
+    if not MISTRAL_KEY:
+        raise RuntimeError("MISTRAL_API_KEY no configurada")
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    req = urllib.request.Request(
+        "https://api.mistral.ai/v1/chat/completions",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {MISTRAL_KEY}",
+            "HTTP-Referer": f"http://localhost:{PORT}",
+            "X-Title": "Verdix AI",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=90) as response:
+        data = json.loads(response.read().decode("utf-8"))
+    return data["choices"][0]["message"]["content"]
+
+
+# ---------------------------------------------------------------------------
+# IA de respaldo: HuggingFace Inference API (Qwen2.5-72B-Instruct)
+# ---------------------------------------------------------------------------
+
+
+def huggingface_chat(messages, model="Qwen/Qwen2.5-72B-Instruct", temperature=0.7, max_tokens=2048):
+    """Llama a HuggingFace Inference API y devuelve el texto de respuesta."""
+    if not HF_KEY:
+        raise RuntimeError("HF_API_KEY no configurada")
+    # Convertir mensajes a un solo prompt para HF
+    prompt = "\n".join(f"{m.get('role', 'user')}: {m.get('content', '')}" for m in messages)
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": max_tokens,
+            "temperature": temperature,
+            "return_full_text": False,
+        },
+    }
+    req = urllib.request.Request(
+        f"https://api-inference.huggingface.co/models/{model}",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {HF_KEY}",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=90) as response:
+        body = response.read().decode("utf-8")
+    try:
+        obj = json.loads(body)
+        if isinstance(obj, list) and len(obj) > 0:
+            return obj[0].get("generated_text", str(obj)).strip()
+        return str(obj).strip()
+    except (json.JSONDecodeError, KeyError, IndexError):
+        return body.strip()
+
+
+# ---------------------------------------------------------------------------
+# Generación de imágenes gratis: Pollinations.ai (sin clave API)
+# ---------------------------------------------------------------------------
+
+
+def pollinations_image_generate(prompt, model="flux"):
+    """Genera una imagen vía Pollinations.ai (gratis, sin clave)."""
+    encoded_prompt = urllib.parse.quote(prompt)
+    url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?model={model}&width=1024&height=1024"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, timeout=120) as response:
+        # Pollinations devuelve la imagen directamente o una URL de redirección
+        return response.geturl() or url
 
 
 # ---------------------------------------------------------------------------
@@ -507,23 +623,55 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 },
             )
 
+            # Intento 1: OpenRouter (DeepSeek)
+            respuesta = None
+            error_openrouter = None
             try:
                 with urllib.request.urlopen(request, timeout=90) as response:
                     respuesta = json.loads(response.read().decode("utf-8"))
-                # Incrementar contador tras éxito
+            except urllib.error.HTTPError as exc:
+                error_openrouter = f"HTTP {exc.code}: {exc.read().decode('utf-8', 'replace')[:200]}"
+            except Exception as exc:  # noqa: BLE001
+                error_openrouter = str(exc)
+
+            if respuesta:
+                # Éxito con OpenRouter
                 with _uso_lock:
                     uso = _cargar_uso()
                     _incrementar_contador(uso, usuario, "chat")
                 self._json(200, respuesta)
-            except urllib.error.HTTPError as exc:
-                detail = exc.read().decode("utf-8", "replace")
+                return
+
+            # Intento 2: Groq (respaldo si OpenRouter falla)
+            if GROQ_KEY:
                 try:
-                    detail = json.loads(detail)
-                except json.JSONDecodeError:
-                    pass
-                self._json(exc.code, {"error": detail})
-            except Exception as exc:  # noqa: BLE001
-                self._json(500, {"error": str(exc)})
+                    texto_groq = groq_chat(messages, temperature=temperature, max_tokens=max_tokens)
+                    respuesta_groq = {
+                        "id": "groq-fallback",
+                        "object": "chat.completion",
+                        "model": "llama-3.1-405b-reasoning",
+                        "choices": [{"index": 0, "message": {"role": "assistant", "content": texto_groq}}],
+                    }
+                    with _uso_lock:
+                        uso = _cargar_uso()
+                        _incrementar_contador(uso, usuario, "chat")
+                    self._json(200, respuesta_groq)
+                    return
+                except Exception as exc:  # noqa: BLE001
+                    self._json(
+                        500,
+                        {
+                            "error": f"OpenRouter falló: {error_openrouter}. Groq también falló: {str(exc)[:200]}",
+                        },
+                    )
+                    return
+            else:
+                self._json(
+                    500,
+                    {
+                        "error": f"OpenRouter falló: {error_openrouter}. Groq no está configurado (GROQ_API_KEY faltante).",
+                    },
+                )
             return
 
         # ---------------------------------------------------------------
@@ -666,19 +814,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json(400, {"error": "JSON inválido"})
                 return
 
-            if not OPENROUTER_KEY:
-                self._json(503, {"error": "Falta OPENROUTER_API_KEY"})
-                return
-
             prompt = data.get("prompt", "")
             if not prompt:
                 self._json(400, {"error": "Falta el parámetro prompt"})
                 return
 
-            model = data.get("model", "black-forest-labs/flux-schnell").strip()
+            model = data.get("model", "flux").strip()
 
             try:
-                url_imagen = openrouter_image_generate(prompt, model=model)
+                # Intento 1: Pollinations.ai (gratis, sin clave API)
+                url_imagen = pollinations_image_generate(prompt, model=model)
                 with _uso_lock:
                     uso = _cargar_uso()
                     _incrementar_contador(uso, usuario, "image")
@@ -689,18 +834,49 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         "prompt": prompt,
                         "model": model,
                         "url": url_imagen,
+                        "fuente": "pollinations.ai",
                     },
                 )
-            except urllib.error.HTTPError as exc:
-                detail = exc.read().decode("utf-8", "replace")
-                try:
-                    detail = json.loads(detail)
-                except json.JSONDecodeError:
-                    pass
-                self._json(exc.code, {"error": detail})
-            except Exception as exc:  # noqa: BLE001
-                self._json(500, {"error": str(exc)})
-            return
+                return
+            except Exception as exc_poll:  # noqa: BLE001
+                # Intento 2: OpenRouter (respaldo)
+                if OPENROUTER_KEY:
+                    try:
+                        url_imagen = openrouter_image_generate(prompt, model=model)
+                        with _uso_lock:
+                            uso = _cargar_uso()
+                            _incrementar_contador(uso, usuario, "image")
+                        self._json(
+                            200,
+                            {
+                                "ok": True,
+                                "prompt": prompt,
+                                "model": model,
+                                "url": url_imagen,
+                                "fuente": "openrouter",
+                            },
+                        )
+                        return
+                    except urllib.error.HTTPError as exc:
+                        detail = exc.read().decode("utf-8", "replace")
+                        self._json(exc.code, {"error": detail})
+                        return
+                    except Exception as exc:  # noqa: BLE001
+                        self._json(
+                            500,
+                            {
+                                "error": f"Pollinations falló: {str(exc_poll)[:200]}. OpenRouter también falló: {str(exc)[:200]}",
+                            },
+                        )
+                        return
+                else:
+                    self._json(
+                        500,
+                        {
+                            "error": f"Pollinations falló: {str(exc_poll)[:200]}. OpenRouter no está configurado.",
+                        },
+                    )
+                return
 
         # ---------------------------------------------------------------
         # Cualquier otra POST -> 404

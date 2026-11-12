@@ -6,5 +6,17 @@
   "user:test_fase28": {
     "chat_count": 1,
     "chat_last": "2026-11-11T23:48:27Z"
+  },
+  "user:test_fase37": {
+    "chat_count": 1,
+    "chat_last": "2026-11-12T00:55:40Z"
+  },
+  "user:test_fase38": {
+    "chat_count": 1,
+    "chat_last": "2026-11-12T01:07:14Z",
+    "image_count": {
+      "2026-11-12": 1
+    },
+    "image_last": "2026-11-12T01:07:22Z"
   }
 }
